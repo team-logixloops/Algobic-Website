@@ -128,6 +128,7 @@ const structuredData = [
       isPartOf: { "@id": `${SITE.url}/#website` },
       about: { "@id": `${SITE.url}/#organization` },
       inLanguage: "en",
+      dateModified: SITE.updated,
       primaryImageOfPage: {
         "@type": "ImageObject",
         url: `${SITE.url}/opengraph-image.png`,

@@ -33,4 +33,10 @@ export const SITE = {
   instagram: "https://www.instagram.com/algobic.in?igsh=cWlsZXNtZDJmOW1v",
   instagramHandle: "algobic.in",
   locale: "en_IN",
+  /**
+   * Date the page content last actually changed — bump it by hand when it does.
+   * A build-time `new Date()` here would change on every deploy and every
+   * request, which is exactly the churn that makes crawlers ignore lastmod.
+   */
+  updated: "2026-07-27",
 } as const;
