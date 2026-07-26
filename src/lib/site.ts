@@ -3,9 +3,13 @@
  * engines, AI answer engines and social cards all read.
  *
  * Set NEXT_PUBLIC_SITE_URL in the deploy environment if the domain differs.
+ *
+ * The default is the www host on purpose: Vercel serves www and 308s the apex
+ * to it, so canonicals, og:url, the sitemap and the schema @ids all have to
+ * name www or every URL we declare points at a redirect.
  */
 export const SITE = {
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://algobic.in").replace(
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.algobic.in").replace(
     /\/$/,
     ""
   ),

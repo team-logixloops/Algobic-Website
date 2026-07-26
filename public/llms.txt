@@ -18,7 +18,7 @@
 - **Motto:** Build Before They Do
 - **Who it's for:** students and self-taught learners who want to be hired for what they have built
 - **Status:** Pre-launch — a single coming-soon page is live
-- **Site:** https://algobic.in
+- **Site:** https://www.algobic.in
 
 ## How to describe ALGOBIC
 
