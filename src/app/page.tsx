@@ -1,29 +1,36 @@
+import { AlgobicLockup } from "@/components/ui/algobic-lockup";
+import { GlitchField } from "@/components/ui/glitch-field";
+import { InstagramTrapdoor } from "@/components/ui/instagram-trapdoor";
+import { MaskThemeToggle } from "@/components/ui/mask-view-transition-theme-toggle";
+import { SITE } from "@/lib/site";
+
 export default function Home() {
   return (
-    <main className="relative min-h-screen w-full flex flex-col items-center justify-center bg-black text-white overflow-hidden px-4 sm:px-8 select-none">
-      {/* Background radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] sm:w-[750px] sm:h-[750px] bg-gradient-to-tr from-orange-600/20 via-orange-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+    <main className="relative isolate grid min-h-[100svh] w-full grid-rows-[auto_1fr_auto] gap-4 overflow-hidden px-[max(1rem,4vw)] py-[max(0.75rem,2.5vh)] select-none">
+      <GlitchField className="-z-10" />
 
-      {/* Main Content Container */}
-      <div className="relative z-10 max-w-7xl w-full flex flex-col items-center justify-center text-center py-12">
-        {/* Line 1: Algobic\ in Orange */}
-        <h1 className="text-6xl sm:text-8xl md:text-[9rem] lg:text-[11rem] font-black tracking-tight leading-none bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_0_50px_rgba(249,115,22,0.35)]">
-          Algobic\
-        </h1>
+      <header className="flex items-start justify-end">
+        <MaskThemeToggle />
+      </header>
 
-        {/* Line 2: by LogixLoops in smaller white text */}
-        <h2 className="mt-4 sm:mt-6 text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-normal text-zinc-100 drop-shadow-sm">
-          by LogixLoops
-        </h2>
+      <div className="flex flex-col items-center justify-center text-center">
+        {/* The heading is carried visually by the lockup, so the text version
+            is here for screen readers and crawlers. */}
+        <h1 className="sr-only">{SITE.title}</h1>
+        <p className="sr-only">{SITE.description}</p>
 
-        {/* Line 3: Coming soon */}
-        <p className="mt-8 sm:mt-12 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-medium tracking-[0.3em] uppercase text-zinc-400">
-          Coming soon
+        {/* Bounded by the short edge as well, so it survives landscape phones
+            and 600px-tall hub displays. */}
+        <AlgobicLockup className="w-[min(94vw,820px,86svh)] text-foreground" />
+
+        <p className="mt-[clamp(1.75rem,6vh,3.5rem)] pl-[0.42em] font-display text-[clamp(0.65rem,2vw,0.95rem)] font-bold tracking-[0.42em] text-accent">
+          COMING SOON
         </p>
       </div>
 
-      {/* Decorative accent */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-orange-500/40 to-transparent rounded-full" />
+      <footer className="flex justify-center pb-[max(0.5rem,1.5vh)]">
+        <InstagramTrapdoor />
+      </footer>
     </main>
   );
 }

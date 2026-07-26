@@ -1,26 +1,283 @@
 @import "tailwindcss";
 
+/* Tailwind v4 has no `darkMode: "class"` config — the variant is declared here. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f5f2;
+  --foreground: #0b0a0c;
+  --muted: #6b6560;
+  --line: #ddd7ce;
+  --accent: #ff7712;
+
+  /* Theme reveal: the new theme zooms in through the ALGOBIC\ letterforms. */
+  --algobic-vt-mask: url("/brand/algobic-wordmark-mask.svg");
+  --algobic-vt-duration: 1.4s;
+  --algobic-vt-hold-size: min(88vw, 1000px);
+  --expo-in: linear(
+    0 0%,
+    0.0085 31.26%,
+    0.0167 40.94%,
+    0.0289 48.86%,
+    0.0471 55.92%,
+    0.0717 61.99%,
+    0.1038 67.32%,
+    0.1443 72.07%,
+    0.1989 76.7%,
+    0.2659 80.89%,
+    0.3465 84.71%,
+    0.4419 88.22%,
+    0.554 91.48%,
+    0.6835 94.51%,
+    0.8316 97.34%,
+    1 100%
+  );
+}
+
+.dark {
+  --background: #08070c;
+  --foreground: #f2eef7;
+  --muted: #7a7188;
+  --line: #211c2a;
+  /* README: the mark's accent flips to violet on dark grounds. */
+  --accent: #8847e4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-orbitron);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+   Theme reveal.
+
+   The incoming theme scales up out of nothing into the ALGOBIC\ wordmark,
+   holds long enough to read, then blows straight through the viewport. One
+   axis of motion — scale — and no travel. Vector mask, crisp at every size.
+--------------------------------------------------------------------------- */
+
+::view-transition-group(root) {
+  animation-timing-function: var(--expo-in);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation-duration: var(--algobic-vt-duration);
+  animation-fill-mode: both;
+}
+
+/* The outgoing snapshot only has to hold still underneath. */
+::view-transition-old(root) {
+  animation-name: algobic-vt-hold;
+}
+
+::view-transition-new(root) {
+  animation-name: algobic-vt-zoom;
+  -webkit-mask-image: var(--algobic-vt-mask);
+  mask-image: var(--algobic-vt-mask);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+@keyframes algobic-vt-hold {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes algobic-vt-zoom {
+  0% {
+    -webkit-mask-size: 0;
+    mask-size: 0;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* readable wordmark */
+  26% {
+    -webkit-mask-size: var(--algobic-vt-hold-size);
+    mask-size: var(--algobic-vt-hold-size);
+    animation-timing-function: linear;
+  }
+  /* hold */
+  58% {
+    -webkit-mask-size: var(--algobic-vt-hold-size);
+    mask-size: var(--algobic-vt-hold-size);
+    animation-timing-function: var(--expo-in);
+  }
+  /* through the viewport */
+  100% {
+    -webkit-mask-size: 4000vmax;
+    mask-size: 4000vmax;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Instagram trapdoor.
+
+   Closed, it is an Instagram glyph split across a seam. Hover or focus and the
+   two halves slide apart, carrying half the glyph each, to reveal the handle.
+   Pointers that cannot hover get the reveal played once on load instead.
+--------------------------------------------------------------------------- */
+
+.trapdoor {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: min(260px, 76vw);
+  height: 76px;
+  color: var(--accent);
+}
+
+/* Closed, the glyph is whole. Its halves are clipped copies sitting either
+   side of the seam; on hover they part and slide out of the frame. */
+.trapdoor__door {
+  position: absolute;
+  left: 0;
+  z-index: 2;
+  overflow: hidden;
+  width: 100%;
+  height: 50%;
+  transition: transform 420ms ease-in-out;
+}
+
+.trapdoor__door--top {
+  top: 0;
+}
+
+.trapdoor__door--bottom {
+  top: 50%;
+}
+
+.trapdoor__glyph {
+  position: absolute;
+  left: 50%;
+  width: 56px;
+  height: 56px;
+  margin-left: -28px;
+}
+
+.trapdoor__door--top .trapdoor__glyph {
+  top: calc(100% - 28px);
+}
+
+.trapdoor__door--bottom .trapdoor__glyph {
+  top: -28px;
+}
+
+.trapdoor__reveal {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  opacity: 0;
+  transition: opacity 260ms ease-out 140ms;
+}
+
+.trapdoor__handle {
+  font-size: 0.875rem;
+  letter-spacing: 0.16em;
+}
+
+@media (hover: hover) {
+  .trapdoor:hover .trapdoor__door--top,
+  .trapdoor:focus-visible .trapdoor__door--top {
+    transform: translateY(-100%);
+  }
+
+  .trapdoor:hover .trapdoor__door--bottom,
+  .trapdoor:focus-visible .trapdoor__door--bottom {
+    transform: translateY(100%);
+  }
+
+  .trapdoor:hover .trapdoor__reveal,
+  .trapdoor:focus-visible .trapdoor__reveal {
+    opacity: 1;
+  }
+}
+
+/* Touch has no hover, so play the reveal once after load and leave it open. */
+@media (hover: none) {
+  .trapdoor__door--top {
+    animation: trapdoor-part-up 620ms 1s ease-in-out both;
+  }
+
+  .trapdoor__door--bottom {
+    animation: trapdoor-part-down 620ms 1s ease-in-out both;
+  }
+
+  .trapdoor__reveal {
+    animation: trapdoor-reveal 400ms 1.25s ease-out both;
+  }
+}
+
+@keyframes trapdoor-part-up {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes trapdoor-part-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes trapdoor-reveal {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trapdoor__door,
+  .trapdoor__reveal {
+    transition: none;
+    animation: none;
+  }
+
+  @media (hover: none) {
+    .trapdoor__door {
+      opacity: 0;
+    }
+
+    .trapdoor__reveal {
+      opacity: 1;
+    }
+  }
 }
