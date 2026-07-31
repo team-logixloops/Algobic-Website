@@ -3,27 +3,66 @@
 /* Tailwind v4 has no `darkMode: "class"` config. The variant is declared here. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
+/* ---------------------------------------------------------------------------
+   Two palettes, each declared exactly once.
+
+   The selector lists are the whole mechanism. `.ground-flip` marks a block that
+   runs the opposite theme's colours: a light reader gets the dark values
+   verbatim and a dark reader gets the light ones. `.dark .ground-flip` outranks
+   `.ground-flip` on specificity, so one pair of blocks flips in both
+   directions.
+
+   Written this way so the landing page can invert a single screen without
+   introducing a third palette or one new pairing to measure. Every value below
+   was checked with a contrast checker on 2026-07-31 against both of its
+   grounds; an inverted block reuses those same numbers rather than inventing
+   colours nobody has measured.
+
+   `@theme inline` maps Tailwind's `--color-*` to these by reference rather than
+   by value, which is what lets a scoped override reach `bg-background` and
+   `text-muted` inside the flipped block.
+--------------------------------------------------------------------------- */
+
+:root,
+.dark .ground-flip {
   --background: #f7f5f2;
   --foreground: #0b0a0c;
   --muted: #6b6560;
   --line: #ddd7ce;
+  /* 2.44:1 on this background. Under the 3:1 floor WCAG 1.4.11 sets for
+     graphical objects, so on paper it carries no text and no meaning at any
+     size. It fills, tints and decorates only. */
   --accent: #ff7712;
   /* Panels, one step off the paper. */
   --surface: #efebe4;
   /* The shatter field's ambient ink, tunable without touching --foreground. */
   --shard: #b8b0a4;
-  /* Measured 2026-07-31, not estimated: --accent is 2.44:1 on this background.
-     That is under the 3:1 floor WCAG 1.4.11 sets for graphical objects, so on
-     paper it carries no text and no meaning at any size. It fills, tints and
-     decorates only. --accent-ink is 6.26:1 here and carries everything that
-     has to be read or operated. */
+  /* 6.26:1 here. Carries everything that has to be read or operated. */
   --accent-ink: #9c3d06;
   /* Each theme's second accent is the other theme's first. The toggle trades
      colours instead of just flipping brightness, and no new hue enters the
      system: both were already in the mark. */
   --accent-2: #8847e4;
+}
 
+.dark,
+.ground-flip {
+  --background: #08070c;
+  --foreground: #f2eef7;
+  /* Was #7a7188, measured at 4.35:1 on this ground: under AA for body text,
+     which is exactly what it sets. Lifted to 4.96:1 on background and 4.75:1
+     on surface. Same violet-shifted grey, one step brighter. */
+  --muted: #847a94;
+  --line: #211c2a;
+  /* README: the mark's accent flips to violet on dark grounds. */
+  --accent: #8847e4;
+  --surface: #100d18;
+  --shard: #2e2640;
+  --accent-ink: #a97cf0;
+  --accent-2: #ff7712;
+}
+
+:root {
   /* Theme reveal: the new theme zooms in through the ALGOBIC\ letterforms. */
   --algobic-vt-mask: url("/brand/algobic-wordmark-mask.svg");
   --algobic-vt-duration: 1.4s;
@@ -46,22 +85,6 @@
     0.8316 97.34%,
     1 100%
   );
-}
-
-.dark {
-  --background: #08070c;
-  --foreground: #f2eef7;
-  /* Was #7a7188, measured at 4.35:1 on this ground: under AA for body text,
-     which is exactly what it sets. Lifted to 4.96:1 on background and 4.75:1
-     on surface. Same violet-shifted grey, one step brighter. */
-  --muted: #847a94;
-  --line: #211c2a;
-  /* README: the mark's accent flips to violet on dark grounds. */
-  --accent: #8847e4;
-  --surface: #100d18;
-  --shard: #2e2640;
-  --accent-ink: #a97cf0;
-  --accent-2: #ff7712;
 }
 
 @theme inline {
@@ -303,6 +326,26 @@ a:focus-visible .slash-glyph {
   }
 }
 
+/* The same, descending. The skew is carried in the keyframe rather than in a
+   class, because a transform declared in one place and animated in another
+   silently replaces the other: the skew would survive exactly until the first
+   frame of the animation and then vanish.
+
+   Positive, where every short jog on the site is negative. Direction is
+   unreadable on a fifteen-pixel tick and unmistakable on a four-hundred-pixel
+   one: negative leans the foot of the rule left, which on the first column
+   walks it straight off the side of the panel. Positive leans it the way the
+   mark's own backslash runs and the way the panels arrive, and keeps it inside
+   the column it belongs to. */
+@keyframes algobic-draw-down {
+  from {
+    transform: skewX(var(--slash-angle)) scaleY(0);
+  }
+  to {
+    transform: skewX(var(--slash-angle)) scaleY(1);
+  }
+}
+
 /* Depth. The ground lags behind the content it sits under. */
 @keyframes algobic-parallax {
   to {
@@ -376,6 +419,18 @@ a:focus-visible .slash-glyph {
       animation-range: entry var(--r, 4%) cover var(--r-end, 26%);
     }
 
+    /* The same gesture turned ninety degrees, for a rule that descends rather
+       than crosses. "How it works" owns a whole screen and the distance between
+       a step and its outcome is most of that screen; the descending rule is
+       what makes the distance read as a path rather than as a gap. Skewed to
+       the slash like every other jog on the site, so it arrives leaning. */
+    .draw-scroll-y {
+      transform-origin: top center;
+      animation: algobic-draw-down 1s linear both;
+      animation-timeline: view();
+      animation-range: entry var(--r, 0%) cover var(--r-end, 34%);
+    }
+
     /* The seam is the site's signature, so it draws rather than fades. Scroll
        position pulls the rule across, which is the slash arriving. */
     .draw-scroll {
@@ -442,11 +497,114 @@ a:focus-visible .slash-glyph {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   The build wall's resting state.
+
+   `/builds` reserves three screens of scroll for a plane of tiles that starts
+   dim, tilted and 700px high, and is rotated into place by scroll position.
+   Two readers never get that scroll: someone who asked for reduced motion, and
+   someone whose JavaScript did not arrive. Both must be handed the finished
+   wall, and both must be handed it during parse rather than after hydration,
+   or the correction is itself the flash it was meant to prevent.
+
+   `!important` is load-bearing, not lazy: motion writes `transform` and
+   `opacity` as inline styles on these elements, and an unflagged rule loses to
+   an inline one every time.
+
+   Rows two and three are dropped rather than wrapped. Wrapping them was tried
+   and measured: at 1440px two tiles fit per line, so fifteen of them became a
+   4773px column of decoration that says nothing. Every tile in the wall is
+   `aria-hidden` and carries no fact, so the honest static version is one
+   clipped band of it under the header, not eight screens of it.
+
+   Declared twice rather than merged. The two conditions are genuinely
+   different - one is a media query, one is a class on the root - and CSS has
+   no way to share a declaration block between them without a preprocessor.
+--------------------------------------------------------------------------- */
+
+.wall__shell {
+  height: 300vh;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall__shell {
+    height: auto;
+    perspective: none;
+    transform-style: flat;
+  }
+
+  .wall__plane,
+  .wall__tile {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .wall__row {
+    margin-bottom: 0;
+  }
+
+  .wall__row:nth-child(n + 2) {
+    display: none;
+  }
+}
+
+html:not(.js) .wall__shell {
+  height: auto;
+  perspective: none;
+  transform-style: flat;
+}
+
+html:not(.js) :is(.wall__plane, .wall__tile) {
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+html:not(.js) .wall__row {
+  margin-bottom: 0;
+}
+
+html:not(.js) .wall__row:nth-child(n + 2) {
+  display: none;
+}
+
 /* 0.42em tracking is right at desktop and profligate on a 240px screen, where
    an eyebrow can eat three lines. */
 @media (width < 40rem) {
   .eyebrow {
     letter-spacing: 0.22em;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The 404 board's two-state line.
+
+   Both states ship in the HTML and CSS picks one. The server cannot know a
+   reader's motion preference, so deciding this in React would render the
+   invitation, hydrate, and flip: one frame of an offer that reduced-motion
+   readers were never being made, since for them nothing on the board moves.
+--------------------------------------------------------------------------- */
+
+.pong-line [data-state="done"] {
+  display: none;
+}
+
+.pong-line[data-cleared="true"] [data-state="play"] {
+  display: none;
+}
+
+.pong-line[data-cleared="true"] [data-state="done"] {
+  display: inline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pong-line [data-state="play"] {
+    display: none;
+  }
+
+  .pong-line [data-state="done"] {
+    display: inline;
   }
 }
 
@@ -664,5 +822,232 @@ a:focus-visible .slash-glyph {
     .trapdoor__reveal {
       opacity: 1;
     }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The preloader.
+
+   Shown on the first load of a browser session and never again inside it. The
+   decision is read by the inline head script in `layout.tsx` and written to
+   `<html>` as `data-preload`, for the same reason the theme is: a decision made
+   in React is a decision made after the browser has already painted the answer
+   it is about to correct.
+
+   Every piece of timing lives here rather than in the component. `preloader.tsx`
+   owns the canvas field and the scramble, and nothing else; both are
+   decoration. The consequence is that a hydration failure cannot trap anyone
+   behind a full-screen panel. The sentence still fades in, the ground still
+   wipes off on the slash, the overlay still clears, and the hero still gets its
+   entrance on time, with no JavaScript beyond the head script that set the
+   attribute. With JavaScript off entirely the attribute is never set and there
+   is no overlay at all.
+
+   The exit is two gestures at once. The content leaves on the wind, along the
+   same vector the dashes travel. The ground leaves on the slash, in the same
+   direction `.wipe` runs, so the page is uncovered from the top left and the
+   hero is the first thing exposed.
+--------------------------------------------------------------------------- */
+
+:root {
+  --preload-total: 2200ms;
+  /* The point at which the sentence is fully legible. `preloader.tsx` holds the
+     same number: the two have to agree or the accent full stop arrives against
+     a line that is still noise. */
+  --preload-resolve: 1100ms;
+  --preload-content-out: 1700ms;
+  --preload-sheet-out: 1780ms;
+  /* The hero starts arriving while the ground is still leaving. Waiting for a
+     clear screen puts a beat of nothing between the two. */
+  --preload-handoff: 1900ms;
+}
+
+/* Default is absent, so the markup costs a repeat visit nothing but its bytes. */
+.preloader {
+  display: none;
+}
+
+/* Never takes a click. The page underneath stays operable for the two seconds
+   this is up, and `ShardCursor` at `z-index: 100` is simply covered rather than
+   inverting itself against a ground it was never measured on. */
+html[data-preload] .preloader {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  overflow: clip;
+  pointer-events: none;
+  animation: preload-clear 1ms linear var(--preload-total) both;
+}
+
+/* Wider than the viewport and offset left, so the skew cannot open a wedge at
+   either corner. */
+.preloader__sheet {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -30%;
+  width: 160%;
+  background: var(--background);
+  transform: translate3d(0, 0, 0)
+    skewX(calc(-1 * var(--slash-angle)));
+}
+
+.preloader__content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-inline: clamp(1rem, 5vw, 3rem);
+}
+
+.preloader__field {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* The data face, not the display face. Two reasons, and the first one is not
+   taste: a proportional face changes width every time a character is swapped,
+   so a scramble set in Orbitron jitters horizontally for its whole run. Plex
+   Mono holds the line still. It is also the face this site already uses for
+   machine output, and a preloader is machine output.
+
+   `pre-wrap` rather than `pre`: at 240px the sentence does not fit on one line,
+   and the only break opportunities are the spaces, which never scramble. */
+.preloader__line {
+  position: relative;
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: clamp(0.875rem, 2.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  color: var(--foreground);
+  white-space: pre-wrap;
+  text-align: center;
+}
+
+/* Unresolved characters are the field's colour, so the sentence condenses out
+   of the same material the dashes are made of rather than arriving over it. */
+.preloader__line [data-dud] {
+  color: var(--shard);
+}
+
+/* The one coloured mark, on the one piece of punctuation. Same gesture as the
+   headline's accented full stop, at a twentieth of the size. */
+.preloader__stop {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Covers the scramble's first frames. If this file's component arrives before
+     the fade completes nobody sees the resting sentence; if it arrives after,
+     the component declines to scramble at all rather than pulling a legible
+     line back into noise. */
+  html[data-preload] .preloader__line {
+    animation: preload-line-in 300ms var(--ease-out-quint) both;
+  }
+
+  html[data-preload] .preloader__stop {
+    animation: preload-stop-in 220ms var(--ease-out-quint)
+      var(--preload-resolve) both;
+  }
+
+  html[data-preload] .preloader__content {
+    animation: preload-content-out 260ms var(--ease-out-quint)
+      var(--preload-content-out) both;
+  }
+
+  html[data-preload] .preloader__sheet {
+    animation: preload-sheet-out 420ms var(--ease-out-expo)
+      var(--preload-sheet-out) both;
+  }
+
+  /* The hero handoff.
+
+     Offsetting the delay rather than pausing the animation, so this resolves on
+     a clock rather than on an attribute somebody has to remember to remove.
+     Pausing would mean the entrances stay frozen forever if the script that set
+     the attribute is the last JavaScript that ever runs, and a permanently
+     paused `.rise` is permanently invisible text.
+
+     Placed after the block that declares `.rise` and `.draw`, and outranking it
+     on specificity. */
+  html[data-preload] .rise,
+  html[data-preload] .draw {
+    animation-delay: calc(var(--d, 0ms) + var(--preload-handoff));
+  }
+}
+
+/* One still frame, held for the same beat, leaving on opacity alone. The field
+   paints once and the sentence is never scrambled, so what a reader who asked
+   for less motion gets is a poster rather than an animation. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-preload] .preloader__content,
+  html[data-preload] .preloader__sheet {
+    animation: preload-fade-out 320ms linear var(--preload-content-out) both;
+  }
+}
+
+@keyframes preload-line-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes preload-stop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 4vw across and 1.15vw down is 16deg, the same vector the dashes travel. */
+@keyframes preload-content-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(4vw, 1.15vw, 0);
+  }
+}
+
+/* 88% of a sheet 160% as wide as the viewport carries its left edge from -30vw
+   to 111vw, which clears the screen with the skew accounted for. */
+@keyframes preload-sheet-out {
+  from {
+    transform: translate3d(0, 0, 0) skewX(calc(-1 * var(--slash-angle)));
+  }
+  to {
+    transform: translate3d(88%, 0, 0) skewX(calc(-1 * var(--slash-angle)));
+  }
+}
+
+@keyframes preload-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Discrete, and the only property here that is neither opacity nor transform.
+   It runs once, at the end, on an element that is already fully transparent,
+   and it exists so the canvas stops being composited at all. */
+@keyframes preload-clear {
+  from {
+    visibility: visible;
+  }
+  to {
+    visibility: hidden;
   }
 }
