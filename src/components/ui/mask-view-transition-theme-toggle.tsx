@@ -13,7 +13,7 @@ type ViewTransitionDocument = Document & {
 };
 
 /**
- * The `dark` class on <html> is the source of truth — the layout's inline
+ * The `dark` class on <html> is the source of truth: the layout's inline
  * script sets it before first paint. Components subscribe to it rather than
  * mirroring it, so there is nothing to keep in sync and nothing to hydrate
  * wrong.
@@ -49,7 +49,7 @@ function applyTheme(theme: Theme) {
   try {
     localStorage.setItem(STORAGE_KEY, theme);
   } catch {
-    // private mode — the class still applies, it just won't persist
+    // private mode: the class still applies, it just won't persist
   }
 }
 
@@ -64,7 +64,7 @@ export function useThemeSystem() {
 }
 
 interface MaskThemeToggleProps {
-  /** SVG/GIF used as the reveal mask. Must be solid — masks read alpha only. */
+  /** SVG/GIF used as the reveal mask. Must be solid: masks read alpha only. */
   maskUrl?: string;
   /** Total length of the reveal. */
   duration?: string;
@@ -99,52 +99,68 @@ export function MaskThemeToggle({
     });
   };
 
+  /* Two things here are deliberate.
+   *
+   * The label does not name the theme it switches to. `getServerSnapshot` has
+   * to return something, and whatever it returns is wrong for half of all
+   * visitors: the prerendered HTML would promise "switch to dark" to a reader
+   * who is already in dark, until hydration corrects it. A label that describes
+   * the control rather than its next state is right in both themes at all times.
+   *
+   * Both icons are rendered and one is hidden by the `dark` variant rather than
+   * by state, for the same reason. The `dark` class is on `<html>` before first
+   * paint, so the correct glyph is correct from the first frame, with no
+   * hydration flip.
+   *
+   * accent-ink on hover: --accent is 2.44:1 on paper, so hovering used to make
+   * this icon harder to see rather than easier.
+   */
   return (
     <button
       type="button"
       onClick={handleToggle}
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-      className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-line text-muted transition-colors hover:border-accent hover:text-accent sm:h-10 sm:w-10 ${className}`}
+      aria-label="Switch between light and dark theme"
+      className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-line text-muted transition-colors hover:border-accent-ink hover:text-accent-ink sm:h-10 sm:w-10 ${className}`}
     >
-      {theme === "dark" ? (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="17"
-          height="17"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2" />
-          <path d="M12 20v2" />
-          <path d="m4.93 4.93 1.41 1.41" />
-          <path d="m17.66 17.66 1.41 1.41" />
-          <path d="M2 12h2" />
-          <path d="M20 12h2" />
-          <path d="m6.34 17.66-1.41 1.41" />
-          <path d="m19.07 4.93-1.41 1.41" />
-        </svg>
-      ) : (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="17"
-          height="17"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-        </svg>
-      )}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        className="hidden dark:block"
+      >
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2" />
+        <path d="M12 20v2" />
+        <path d="m4.93 4.93 1.41 1.41" />
+        <path d="m17.66 17.66 1.41 1.41" />
+        <path d="M2 12h2" />
+        <path d="M20 12h2" />
+        <path d="m6.34 17.66-1.41 1.41" />
+        <path d="m19.07 4.93-1.41 1.41" />
+      </svg>
+
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        className="block dark:hidden"
+      >
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+      </svg>
     </button>
   );
 }

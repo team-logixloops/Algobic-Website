@@ -6,7 +6,7 @@ import { MaskThemeToggle } from "@/components/ui/mask-view-transition-theme-togg
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "404 — Not shipped",
+  title: "404: Not shipped",
   description: "That page doesn't exist on ALGOBIC.",
   robots: { index: false, follow: true },
 };
@@ -34,7 +34,8 @@ export default function NotFound() {
           className="group mt-[clamp(1.5rem,5vh,2.75rem)] flex flex-col items-center gap-[clamp(0.75rem,2.5vh,1.25rem)]"
         >
           <AlgobicLockup className="w-[min(58vw,260px)] text-foreground transition-opacity group-hover:opacity-80" />
-          <span className="pl-[0.42em] font-display text-[clamp(0.55rem,1.7vw,0.72rem)] font-bold tracking-[0.42em] text-accent">
+          {/* accent-ink, not accent: at this size --accent is 2.44:1 on paper. */}
+          <span className="pl-[0.42em] font-display text-[clamp(0.55rem,1.7vw,0.72rem)] font-bold tracking-[0.42em] text-accent-ink">
             BACK TO START
           </span>
         </Link>
