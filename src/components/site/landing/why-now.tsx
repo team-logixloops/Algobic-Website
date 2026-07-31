@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Rise } from "@/components/ui/scroll-fx";
 import { WHY_NOW } from "@/lib/evidence";
 
 /**
@@ -19,19 +20,23 @@ export function WhyNow() {
     <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <h2 className="eyebrow text-eyebrow">Why now</h2>
 
-      <p className="reveal mt-[clamp(1.25rem,3vw,2rem)] max-w-[18ch] font-display text-display-l text-balance text-foreground">
+      <p className="mt-[clamp(1.25rem,3vw,2rem)] max-w-[18ch] font-display text-display-l text-balance text-foreground">
         The requirement disappeared.
       </p>
 
-      <dl className="mt-[clamp(2rem,5vw,3.5rem)] border-b border-line">
-        {WHY_NOW.map((row, i) => {
+      {/* One trigger for the whole table: the rows land in sequence as the
+          block arrives rather than each waiting for its own turn, so it reads
+          as a table being printed rather than as five separate reveals. */}
+      <Rise stagger={0.09} y={34} select="[data-row]" className="mt-[clamp(2rem,5vw,3.5rem)]">
+        <dl className="border-b border-line">
+        {WHY_NOW.map((row) => {
           const uncertain = row.confidence !== "verified";
 
           return (
             <div
               key={row.figure}
-              className="reveal grid gap-x-[clamp(1rem,3vw,2.5rem)] gap-y-3 border-t border-line py-[clamp(1.25rem,3vw,2rem)] sm:grid-cols-[minmax(6.5rem,9rem)_minmax(0,1fr)] lg:grid-cols-[10rem_minmax(0,1fr)_16rem]"
-              style={{ "--r": `${2 + i * 2}%` } as React.CSSProperties}
+              data-row
+              className="grid gap-x-[clamp(1rem,3vw,2.5rem)] gap-y-3 border-t border-line py-[clamp(1.25rem,3vw,2rem)] sm:grid-cols-[minmax(6.5rem,9rem)_minmax(0,1fr)] lg:grid-cols-[10rem_minmax(0,1fr)_16rem]"
             >
               {/* Mono at display size, tabular so the column holds a straight
                   left edge whatever the digits are. Muted on the row that has
@@ -85,9 +90,10 @@ export function WhyNow() {
             </div>
           );
         })}
-      </dl>
+        </dl>
+      </Rise>
 
-      <p className="reveal mt-[clamp(1.5rem,4vw,2.5rem)] max-w-[42ch] font-display text-[clamp(1.0625rem,2vw,1.5rem)] leading-snug font-bold text-balance text-foreground">
+      <p className="mt-[clamp(1.5rem,4vw,2.5rem)] max-w-[42ch] font-display text-[clamp(1.0625rem,2vw,1.5rem)] leading-snug font-bold text-balance text-foreground">
         The tools solved capability. Nobody solved activation.
       </p>
     </section>

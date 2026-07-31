@@ -1,6 +1,7 @@
 import * as React from "react";
 import { AssemblingMark } from "@/components/ui/assembling-mark";
 import { InstagramTrapdoor } from "@/components/ui/instagram-trapdoor";
+import { Rise } from "@/components/ui/scroll-fx";
 
 /**
  * Resolution.
@@ -27,13 +28,13 @@ export function Resolution() {
             footer logo, which is the opposite of an arrival. */}
         <AssemblingMark className="mt-[clamp(1.75rem,4.5vw,3.5rem)] w-[clamp(13rem,42vw,32rem)] text-foreground" />
 
-        <p className="reveal-bounded mt-[clamp(1.75rem,4.5vw,3rem)] max-w-[19ch] font-display text-display-l text-balance text-foreground">
+        <Rise stagger={0.12} y={30} start="top 88%" className="flex flex-col items-center">
+        <p className="mt-[clamp(1.75rem,4.5vw,3rem)] max-w-[19ch] font-display text-display-l text-balance text-foreground">
           The thing you scrolled past is still buildable.
         </p>
 
         <p
-          className="reveal-bounded mt-[clamp(1rem,2.5vw,1.5rem)] max-w-[52ch] text-[clamp(0.9375rem,1.35vw,1.0625rem)] leading-relaxed text-balance text-muted"
-          style={{ "--r": "12%" } as React.CSSProperties}
+          className="mt-[clamp(1rem,2.5vw,1.5rem)] max-w-[52ch] text-[clamp(0.9375rem,1.35vw,1.0625rem)] leading-relaxed text-balance text-muted"
         >
           Every build gets published the day it ships, with the exact prompts,
           where it broke, what it cost and a live URL. Instagram is where it
@@ -43,6 +44,7 @@ export function Resolution() {
         <div className="mt-[clamp(1.25rem,3vw,2rem)] flex justify-center">
           <InstagramTrapdoor />
         </div>
+        </Rise>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Rise } from "@/components/ui/scroll-fx";
 
 /**
  * The only numbered thing on the page.
@@ -41,11 +42,13 @@ export function HowItWorks() {
     <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <h2 className="eyebrow text-eyebrow">How it works</h2>
 
-      <ol className="mt-[clamp(1.75rem,4.5vw,3rem)] grid gap-x-[clamp(1.5rem,4vw,3.5rem)] sm:grid-cols-3">
+      <Rise stagger={0.12} y={38} select="[data-step]" className="mt-[clamp(1.75rem,4.5vw,3rem)]">
+        <ol className="grid gap-x-[clamp(1.5rem,4vw,3.5rem)] sm:grid-cols-3">
         {STEPS.map((step, i) => (
           <li
             key={step.n}
-            className="reveal relative border-t border-line pt-[clamp(1.25rem,2.5vw,1.75rem)] pb-[clamp(1.5rem,3vw,2rem)]"
+            data-step
+            className="relative border-t border-line pt-[clamp(1.25rem,2.5vw,1.75rem)] pb-[clamp(1.5rem,3vw,2rem)]"
             style={{ "--r": `${2 + i * 3}%` } as React.CSSProperties}
           >
             {/* `-top-px`, not `top-0`. An absolutely positioned child resolves
@@ -82,7 +85,8 @@ export function HowItWorks() {
             </p>
           </li>
         ))}
-      </ol>
+        </ol>
+      </Rise>
     </section>
   );
 }

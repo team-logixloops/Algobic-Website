@@ -1,4 +1,5 @@
 import * as React from "react";
+import { DrawRule, Parallax } from "@/components/ui/scroll-fx";
 
 /**
  * Three lines: you saw it, you didn't build it, nobody showed you the door.
@@ -40,16 +41,19 @@ export function TheGap() {
     <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <h2 className="eyebrow text-eyebrow">The gap</h2>
 
-      <div className="mt-[clamp(1.5rem,4vw,2.5rem)] flex flex-col gap-[clamp(1.75rem,4.5vw,3rem)]">
+      <div className="mt-[clamp(1.5rem,4vw,2.5rem)] flex flex-col gap-[clamp(2.5rem,7vw,5rem)]">
         {LINES.map((line, i) => (
-          <div
+          /* Each statement drifts at its own rate, increasing down the
+             sequence, so the indent that already carries the progression is
+             reinforced by the three of them separating as you pass. */
+          <Parallax
             key={line.head}
+            speed={0.1 + i * 0.14}
             className={`reveal ${line.indent}`}
-            style={{ "--r": `${2 + i * 4}%` } as React.CSSProperties}
           >
-            <span
-              aria-hidden="true"
-              className={`block h-[3px] w-[clamp(2.5rem,8vw,5rem)] ${line.rule}`}
+            {/* The rule draws itself as you arrive at the statement it heads. */}
+            <DrawRule
+              className={`h-[3px] w-[clamp(2.5rem,8vw,5rem)] ${line.rule}`}
             />
             {/* h3, not p. These are the largest type in the section and they
                 head the paragraph under each one, so a reader navigating by
@@ -61,7 +65,7 @@ export function TheGap() {
             <p className="mt-3 max-w-[52ch] text-[clamp(0.9rem,1.3vw,1rem)] leading-relaxed text-muted">
               {line.body}
             </p>
-          </div>
+          </Parallax>
         ))}
       </div>
     </section>

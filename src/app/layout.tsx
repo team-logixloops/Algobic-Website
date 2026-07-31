@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Inter, Orbitron } from "next/font/google";
+import { MotionProvider } from "@/components/ui/motion-provider";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -163,22 +164,6 @@ export default function RootLayout({
       className={`${inter.variable} ${orbitron.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
-        {/* The brand artwork is drawn with `mask-image` in inline styles, which
-            the HTML preload scanner cannot see: the browser only discovers
-            these after CSSOM and layout. The wordmark is above the fold on
-            every page, so its two layers are declared here by hand.
-
-            The theme-reveal mask is 20 KB and would otherwise be fetched at the
-            moment the reveal starts, stalling the one animation on the site
-            people trigger deliberately. It is prefetched rather than preloaded
-            so it never competes with anything on the critical path. */}
-        <link rel="preload" as="image" href="/brand/algobic-wordmark-ink.svg" />
-        <link
-          rel="preload"
-          as="image"
-          href="/brand/algobic-wordmark-accent.svg"
-        />
-        <link rel="prefetch" as="image" href="/brand/algobic-wordmark-mask.svg" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {structuredData.map((node) => (
           <script
@@ -188,7 +173,9 @@ export default function RootLayout({
           />
         ))}
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <MotionProvider>{children}</MotionProvider>
+      </body>
     </html>
   );
 }

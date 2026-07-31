@@ -8,6 +8,7 @@ import { HowItWorks } from "@/components/site/how-it-works";
 import { TheGap } from "@/components/site/the-gap";
 import { WhatThisIsNot } from "@/components/site/what-this-is-not";
 import { Seam } from "@/components/ui/seam";
+import { ShardCursor } from "@/components/ui/shard-cursor";
 
 /**
  * The landing page.
@@ -31,6 +32,7 @@ import { Seam } from "@/components/ui/seam";
 export default function Home() {
   return (
     <div className="flex min-h-[100svh] flex-col">
+      <ShardCursor />
       <LandingHeader />
 
       <main className="flex-1">

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Rise } from "@/components/ui/scroll-fx";
 
 /**
  * Straight from `brand.md`'s "What we are not".
@@ -35,12 +36,13 @@ export function WhatThisIsNot() {
     <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <h2 className="eyebrow text-eyebrow">What this is not</h2>
 
-      <dl className="mt-[clamp(1.5rem,4vw,2.5rem)] grid gap-x-[clamp(2rem,5vw,4rem)] lg:grid-cols-2">
-        {REFUSALS.map((item, i) => (
+      <Rise stagger={0.07} y={30} select="[data-row]" className="mt-[clamp(1.5rem,4vw,2.5rem)]">
+        <dl className="grid gap-x-[clamp(2rem,5vw,4rem)] lg:grid-cols-2">
+        {REFUSALS.map((item) => (
           <div
             key={item.head}
-            className="reveal flex flex-col gap-1.5 border-t border-line py-[clamp(1rem,2vw,1.375rem)] sm:flex-row sm:gap-6"
-            style={{ "--r": `${2 + i * 2}%` } as React.CSSProperties}
+            data-row
+            className="flex flex-col gap-1.5 border-t border-line py-[clamp(1rem,2vw,1.375rem)] sm:flex-row sm:gap-6"
           >
             <dt className="flex shrink-0 items-baseline gap-2.5 sm:w-[13.5rem]">
               {/* U+00D7, not the heavier U+2715. Plex Mono serves no
@@ -61,7 +63,8 @@ export function WhatThisIsNot() {
             </dd>
           </div>
         ))}
-      </dl>
+        </dl>
+      </Rise>
     </section>
   );
 }
