@@ -234,6 +234,30 @@ export function ShatterGL({ className = "" }: { className?: string }) {
      * produce a pixel again. That is exactly what this component did before
      * this function existed.
      */
+    /**
+     * Set the backing store to its final size before anything asks for a
+     * context. Creating the context first and resizing immediately after makes
+     * the driver allocate a drawing buffer and then throw it away for a
+     * different one on the very next statement, and that reallocation is the
+     * most common way this component lost its context on mount.
+     */
+    const measure = () => {
+      const r = canvas.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return false;
+      box.top = r.top + window.scrollY;
+      box.left = r.left;
+      box.height = r.height;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const nw = Math.max(1, Math.round(r.width * dpr));
+      const nh = Math.max(1, Math.round(r.height * dpr));
+      if (nw === w && nh === h) return false;
+      w = nw;
+      h = nh;
+      canvas.width = w;
+      canvas.height = h;
+      return true;
+    };
+
     const build = () => {
       gl = canvas.getContext("webgl2", {
         alpha: true,
@@ -285,34 +309,13 @@ export function ShatterGL({ className = "" }: { className?: string }) {
       u = {};
       for (const name of UNIFORMS) u[name] = gl.getUniformLocation(prog, name);
 
+      gl.viewport(0, 0, w, h);
       canvas.style.display = "";
       return true;
     };
 
     const resize = () => {
-      const r = canvas.getBoundingClientRect();
-      /* Never hand the driver a zero-sized drawing buffer. A ResizeObserver
-         fires while a pinned section is being measured, and at that moment the
-         box is genuinely 0 x 0. Setting `canvas.width = 0` is what killed the
-         context, and nothing brought it back. */
-      if (r.width < 1 || r.height < 1) return;
-
-      box.top = r.top + window.scrollY;
-      box.left = r.left;
-      box.height = r.height;
-
-      // Capped hard: this shader is fill-rate bound, and a 3x DPR phone would
-      // paint nine times the pixels for a field nobody looks at directly.
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      const nw = Math.max(1, Math.round(r.width * dpr));
-      const nh = Math.max(1, Math.round(r.height * dpr));
-      if (nw === w && nh === h) return;
-
-      w = nw;
-      h = nh;
-      canvas.width = w;
-      canvas.height = h;
-      gl?.viewport(0, 0, w, h);
+      if (measure()) gl?.viewport(0, 0, w, h);
     };
 
     const frame = (now: number) => {
@@ -378,20 +381,18 @@ export function ShatterGL({ className = "" }: { className?: string }) {
       lost = false;
       w = 0;
       h = 0;
-      if (build()) {
-        resize();
-        sync();
-      }
+      measure();
+      if (build()) sync();
     };
     canvas.addEventListener("webglcontextlost", onLost);
     canvas.addEventListener("webglcontextrestored", onRestored);
 
+    measure();
     if (!build()) {
       canvas.removeEventListener("webglcontextlost", onLost);
       canvas.removeEventListener("webglcontextrestored", onRestored);
       return;
     }
-    resize();
     setRunning(true);
 
     const onMove = (e: PointerEvent) => {

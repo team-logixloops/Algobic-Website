@@ -99,8 +99,45 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
 };
 
-// Applies the stored theme before first paint so there is no flash.
+/**
+ * Applies the stored theme before first paint so there is no flash.
+ *
+ * A bare `<script>`, deliberately, and it must stay one.
+ *
+ * React 19 warns about script tags rendered inside components, on the grounds
+ * that they are never executed on a client render. That is true and it is
+ * exactly why this one is fine: it does not need to run on a client render, it
+ * needs to run while the browser is parsing the HTML, which is the one moment
+ * React has no say over. The warning is a development advisory whose premise
+ * does not apply here.
+ *
+ * `next/script` at `beforeInteractive` was tried and reverted. Next serialises
+ * inline `beforeInteractive` scripts into a `self.__next_s` queue that its own
+ * runtime drains, so the code cannot run until the framework chunks have
+ * loaded. Measured by holding those chunks for 1.5s: the document was still
+ * light at DOMContentLoaded, 42ms in, and only flipped once the chunks landed.
+ * That is a guaranteed flash of the wrong theme for every returning visitor
+ * who has chosen one. The bare tag applies it during parse, before anything
+ * paints.
+ *
+ * The JSON-LD blocks below are also native `<script>` tags, on Next's own
+ * guidance: structured data is not executable code, so a native tag is right
+ * and `next/script` is the wrong tool for it.
+ */
 const themeScript = `(function(){try{var t=localStorage.getItem("algobic-theme");if(!t){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}if(t==="dark"){document.documentElement.classList.add("dark")}document.documentElement.style.colorScheme=t}catch(e){}})()`;
+
+/**
+ * `<` becomes its unicode escape before the payload is embedded.
+ *
+ * `JSON.stringify` does not sanitise for HTML context, so a value containing
+ * `</script>` would close the tag and everything after it would be parsed as
+ * markup. Every value here is authored in this repo and none of them contain
+ * one, which is exactly the reasoning that stops being true the first time any
+ * of this is fed from a file or a form.
+ */
+function embedJsonLd(node: object) {
+  return JSON.stringify(node).replace(/</g, "\\u003c");
+}
 
 // Emitted as separate blocks rather than one @graph: every validator reads a
 // top-level @type, and some skip graph-wrapped nodes entirely.
@@ -169,7 +206,7 @@ export default function RootLayout({
           <script
             key={node["@id"]}
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(node) }}
+            dangerouslySetInnerHTML={{ __html: embedJsonLd(node) }}
           />
         ))}
       </head>
