@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Orbitron } from "next/font/google";
+import { IBM_Plex_Mono, Inter, Orbitron } from "next/font/google";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -8,17 +8,32 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-// The wordmark is set in Orbitron 700 — kept for headings and UI accents.
+// The wordmark is set in Orbitron 700, kept for headings and UI accents.
 const orbitron = Orbitron({
   variable: "--font-orbitron",
   subsets: ["latin"],
+});
+
+/**
+ * Data face: hours, ₹, dates, tool names, and the verbatim prompts a build
+ * page quotes. Prompts set in a sans read as paraphrase, which defeats the
+ * point of quoting them.
+ *
+ * Plex over the reflexive JetBrains Mono for two reasons: it has a Devanagari
+ * sibling if Hinglish content ever ships, and it is narrower, so data rows
+ * survive a 360px phone. Not a variable font: weights are explicit.
+ */
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
     default: SITE.title,
-    template: `%s — ${SITE.name}`,
+    template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
   applicationName: SITE.name,
@@ -86,7 +101,7 @@ export const viewport: Viewport = {
 // Applies the stored theme before first paint so there is no flash.
 const themeScript = `(function(){try{var t=localStorage.getItem("algobic-theme");if(!t){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}if(t==="dark"){document.documentElement.classList.add("dark")}document.documentElement.style.colorScheme=t}catch(e){}})()`;
 
-// Emitted as separate blocks rather than one @graph — every validator reads a
+// Emitted as separate blocks rather than one @graph: every validator reads a
 // top-level @type, and some skip graph-wrapped nodes entirely.
 const structuredData = [
     {
@@ -115,7 +130,7 @@ const structuredData = [
       url: SITE.url,
       name: SITE.name,
       description: SITE.about,
-      inLanguage: "en",
+      inLanguage: SITE.lang,
       publisher: { "@id": `${SITE.url}/#organization` },
     },
     {
@@ -127,7 +142,7 @@ const structuredData = [
       description: SITE.about,
       isPartOf: { "@id": `${SITE.url}/#website` },
       about: { "@id": `${SITE.url}/#organization` },
-      inLanguage: "en",
+      inLanguage: SITE.lang,
       dateModified: SITE.updated,
       primaryImageOfPage: {
         "@type": "ImageObject",
@@ -143,11 +158,27 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang={SITE.lang}
       suppressHydrationWarning
-      className={`${inter.variable} ${orbitron.variable} h-full antialiased`}
+      className={`${inter.variable} ${orbitron.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
+        {/* The brand artwork is drawn with `mask-image` in inline styles, which
+            the HTML preload scanner cannot see: the browser only discovers
+            these after CSSOM and layout. The wordmark is above the fold on
+            every page, so its two layers are declared here by hand.
+
+            The theme-reveal mask is 20 KB and would otherwise be fetched at the
+            moment the reveal starts, stalling the one animation on the site
+            people trigger deliberately. It is prefetched rather than preloaded
+            so it never competes with anything on the critical path. */}
+        <link rel="preload" as="image" href="/brand/algobic-wordmark-ink.svg" />
+        <link
+          rel="preload"
+          as="image"
+          href="/brand/algobic-wordmark-accent.svg"
+        />
+        <link rel="prefetch" as="image" href="/brand/algobic-wordmark-mask.svg" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {structuredData.map((node) => (
           <script

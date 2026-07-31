@@ -17,15 +17,23 @@ export const SITE = {
   legalName: "Algobic",
   parent: "LogixLoops",
   tagline: "Build Before They Do",
-  title: "ALGOBIC — Build Before They Do",
-  /** Meta description — kept under 160 characters. */
+  title: "ALGOBIC: Build Before They Do",
+  /**
+   * Meta description, kept under 160 characters.
+   *
+   * Rewritten 2026-07-31 to match the page. The previous copy was the
+   * pre-D-007 employability framing ("the job market changed, education
+   * didn't"), which `decisions.md` D-007 superseded on 2026-07-30 and which the
+   * homepage no longer says. A snippet describing a different site than the one
+   * that loads is a bounce, not a click.
+   */
   description:
-    "The job market changed. Education didn't. ALGOBIC turns students into builders who ship, because companies hire what you've built, not what you've studied.",
+    "ALGOBIC is where people build the AI projects they see online. No coding background, no course. Every build documented end to end, with a live URL.",
   /** Long form, for structured data and answer engines. */
   about:
-    "The job market changed. Education didn't. ALGOBIC exists to close that gap. Most students graduate; very few builders do. The internet doesn't care about your CGPA and companies don't hire notes — what matters is what you've shipped. ALGOBIC turns students into builders who ship real, public work.",
+    "ALGOBIC is where people build the AI projects they see online. The tools solved capability; nobody solved activation. No degree, no coding background and no course to buy: you arrive with something you saw and you leave with a thing that exists. Every build is documented end to end, from the exact prompts through where it broke to what it cost and a live URL anyone can open. ALGOBIC is not a school, not a tool and not a placement service.",
   shortDescription:
-    "Closing the gap between education and the job market. Students graduate; builders ship. ALGOBIC turns students into builders.",
+    "Where people build the AI projects they see online. No coding background required. Every build documented end to end, with a live URL.",
   manifesto: [
     "The job market changed. Education didn't.",
     "Most students graduate. Very few builders do.",
@@ -38,9 +46,31 @@ export const SITE = {
   instagramHandle: "algobic.in",
   locale: "en_IN",
   /**
-   * Date the page content last actually changed — bump it by hand when it does.
+   * BCP 47 tag for `<html lang>` and schema `inLanguage`, which both want
+   * hyphens, unlike Open Graph's `locale`, which wants the underscore form.
+   * Regionalised on purpose: audience, use cases and domain are all Indian.
+   */
+  lang: "en-IN",
+  /**
+   * Date the page content last actually changed. Bump it by hand when it does.
    * A build-time `new Date()` here would change on every deploy and every
    * request, which is exactly the churn that makes crawlers ignore lastmod.
    */
-  updated: "2026-07-27",
+  updated: "2026-08-01",
 } as const;
+
+/**
+ * "31 Jul 2026". The visible freshness date every page carries.
+ *
+ * Pinned to UTC on both sides: parsing a bare ISO date as local time lands on
+ * the previous day west of Greenwich, and formatting in the viewer's zone would
+ * then disagree with the `datetime` attribute sitting next to it.
+ */
+export function formatUpdated(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}

@@ -1,36 +1,70 @@
-import { AlgobicLockup } from "@/components/ui/algobic-lockup";
-import { GlitchField } from "@/components/ui/glitch-field";
-import { InstagramTrapdoor } from "@/components/ui/instagram-trapdoor";
-import { MaskThemeToggle } from "@/components/ui/mask-view-transition-theme-toggle";
-import { SITE } from "@/lib/site";
+import { LandingFooter } from "@/components/site/landing/landing-footer";
+import { LandingHeader } from "@/components/site/landing/landing-header";
+import { LandingHero } from "@/components/site/landing/landing-hero";
+import { Resolution } from "@/components/site/landing/resolution";
+import { WhyNow } from "@/components/site/landing/why-now";
+import { HowItWorks } from "@/components/site/how-it-works";
+import { TheGap } from "@/components/site/the-gap";
+import { WhatThisIsNot } from "@/components/site/what-this-is-not";
+import { Seam } from "@/components/ui/seam";
 
+/**
+ * The landing page.
+ *
+ * Read top to bottom it is one movement from dispersed to resolved, which is
+ * the mark read backwards: horizontal shards gathering into an animal. The hero
+ * runs the shatter field live and sits off-axis; the closing section is the
+ * only centred block, the only change of ground, and the only place the mark
+ * appears whole.
+ *
+ * Between them the register changes every section on purpose, so no two screens
+ * look like the same template: prose, then a mono data table, then a hairline
+ * grid, then a dense definition list.
+ *
+ * No `select-none`. People copy figures, and this page is asking to be checked.
+ *
+ * Everything here is a Server Component except the shatter field, the theme
+ * toggle and the Instagram trapdoor, which are the only three things that need
+ * a browser. The page reads completely with JavaScript disabled.
+ */
 export default function Home() {
   return (
-    <main className="relative isolate grid min-h-[100svh] w-full grid-rows-[auto_1fr_auto] gap-4 overflow-hidden px-[max(1rem,4vw)] py-[max(0.75rem,2.5vh)] select-none">
-      <GlitchField className="-z-10" />
+    <div className="flex min-h-[100svh] flex-col">
+      <LandingHeader />
 
-      <header className="flex items-start justify-end">
-        <MaskThemeToggle />
-      </header>
+      <main className="flex-1">
+        <LandingHero />
 
-      <div className="flex flex-col items-center justify-center text-center">
-        {/* The heading is carried visually by the lockup, so the text version
-            is here for screen readers and crawlers. */}
-        <h1 className="sr-only">{SITE.title}</h1>
-        <p className="sr-only">{SITE.description}</p>
+        {/* Seams carry no label: every section opens with an eyebrow h2 naming
+            itself, so a label here repeats it, and at 240px the 0.42em tracking
+            pushes the rule past the viewport.
 
-        {/* Bounded by the short edge as well, so it survives landscape phones
-            and 600px-tall hub displays. */}
-        <AlgobicLockup className="w-[min(94vw,820px,86svh)] text-foreground" />
+            The shard count runs down. The first divider still carries the full
+            cluster; by the last there is one mark left on a clean line. That is
+            the same dissolve the cat performs at the foot of the page, spread
+            across the whole document, in the one element with no content to
+            compete with. Nothing announces it and nothing depends on noticing
+            it. */}
+        <Seam shards={3} />
+        <TheGap />
 
-        <p className="mt-[clamp(1.75rem,6vh,3.5rem)] pl-[0.42em] font-display text-[clamp(0.65rem,2vw,0.95rem)] font-bold tracking-[0.42em] text-accent">
-          COMING SOON
-        </p>
-      </div>
+        <Seam shards={3} />
+        <WhyNow />
 
-      <footer className="flex justify-center pb-[max(0.5rem,1.5vh)]">
-        <InstagramTrapdoor />
-      </footer>
-    </main>
+        <Seam shards={2} />
+        <HowItWorks />
+
+        <Seam shards={1} />
+        <WhatThisIsNot />
+
+        <div className="h-[clamp(3rem,8vw,5.5rem)]" />
+
+        {/* No seam before this one. The change of ground is the divider, and
+            two dividers in a row would undo the arrival. */}
+        <Resolution />
+      </main>
+
+      <LandingFooter />
+    </div>
   );
 }
