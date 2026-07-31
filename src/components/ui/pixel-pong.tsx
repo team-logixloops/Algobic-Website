@@ -45,7 +45,7 @@ const MAX_DPR = 2;
 const ROWS = 14;
 const MIN_CELL = 4;
 const ALPHA_HIT = 128;
-const BALL_CELLS = 1.5;
+const BALL_CELLS = 2.2;
 /** Detuned from the reference component's 0.1. At 0.1 the three AI paddles
     cover everything and the player's paddle decides nothing. */
 const AI_LERP = 0.06;
@@ -60,6 +60,15 @@ const KEY_STEP = 16;
 /** Floor on the vertical component, or a shallow rally can leave the ball
     skimming a wall for thousands of frames without reaching a brick. */
 const MIN_VERTICAL = 0.28;
+/** Dead air after a miss, long enough to register the loss before the next
+    ball arrives and short enough that nobody waits for it. */
+const SERVE_DELAY_MS = 850;
+/** Gap between the player's paddle and the open bottom edge. Without it the
+    paddle is the floor and the ball can never actually be lost. */
+const PADDLE_INSET_CELLS = 1.8;
+/** How much faster the ball ends up once the board is nearly clear. The last
+    few bricks are the hardest to reach, so the game gets harder as it thins. */
+const SPEED_RAMP = 0.35;
 
 function readPalette() {
   const s = getComputedStyle(document.documentElement);
@@ -172,6 +181,7 @@ function sampleHeading(
 export function PixelPong({ className = "" }: { className?: string }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const headingRef = React.useRef<HTMLHeadingElement>(null);
+  const hudRef = React.useRef<HTMLParagraphElement>(null);
   const [cleared, setCleared] = React.useState(false);
 
   React.useEffect(() => {
@@ -190,8 +200,18 @@ export function PixelPong({ className = "" }: { className?: string }) {
     let cell = 0;
     let gap = 1;
     let speed = BASE_SPEED;
+    /** Speed before the ramp. `speed` is derived from this and the share of
+        the board already cleared. */
+    let baseSpeed = BASE_SPEED;
     let bricks: Brick[] = [];
+    let total = 0;
     let remaining = 0;
+    let misses = 0;
+    /** False between losing the ball and the next serve. */
+    let inPlay = true;
+    let serveAt = 0;
+    let hudBricks = -1;
+    let hudMisses = -1;
     let paddles: Paddle[] = [];
     let player: Paddle | null = null;
     let ball: Ball = { x: 0, y: 0, dx: 0, dy: 0, half: 0 };
@@ -256,42 +276,75 @@ export function PixelPong({ className = "" }: { className?: string }) {
       bricks = sample.bricks;
       cell = sample.cell;
       gap = Math.max(1, Math.round(cell * 0.12));
-      remaining = bricks.length;
+      total = bricks.length;
+      remaining = total;
+      misses = 0;
       announced = false;
       heading.style.color = "transparent";
 
-      speed =
+      baseSpeed =
         BASE_SPEED *
         Math.max(0.6, Math.min(1.4, Math.min(width, height) / SPEED_REF));
+      speed = baseSpeed;
 
-      const half = (cell * BALL_CELLS) / 2;
-      ball = {
-        x: width * 0.86,
-        y: height * 0.14,
-        dx: -speed,
-        dy: speed,
-        half,
-      };
-      normalise();
+      ball = { x: 0, y: 0, dx: 0, dy: 0, half: (cell * BALL_CELLS) / 2 };
+      serve();
 
       const thick = Math.max(6, cell);
       const len = Math.max(64, Math.min(220, Math.min(width, height) * 0.26));
+      const inset = thick + cell * PADDLE_INSET_CELLS;
       paddles = [
         { x: 0, y: (height - len) / 2, w: thick, h: len, vertical: true, player: false },
         { x: width - thick, y: (height - len) / 2, w: thick, h: len, vertical: true, player: false },
         { x: (width - len) / 2, y: 0, w: len, h: thick, vertical: false, player: false },
-        { x: (width - len) / 2, y: height - thick, w: len, h: thick, vertical: false, player: true },
+        { x: (width - len) / 2, y: height - inset, w: len, h: thick, vertical: false, player: true },
       ];
       player = paddles[3];
       targetX = player.x;
+      updateHud();
       return true;
     };
 
+    /**
+     * Put a ball back in play from the top. The horizontal component is
+     * randomised so a lost ball does not come back on the line that just beat
+     * the player.
+     */
+    const serve = () => {
+      ball.x = width / 2 + (Math.random() - 0.5) * width * 0.4;
+      ball.y = Math.max(ball.half * 2, height * 0.1);
+      ball.dx = (Math.random() < 0.5 ? -1 : 1) * speed * 0.75;
+      ball.dy = speed;
+      normalise();
+      inPlay = true;
+    };
+
+    /** Written straight to the DOM node rather than held in React state: this
+        changes on most frames of a rally, and re-rendering the whole board's
+        component for a counter would be absurd. */
+    const updateHud = () => {
+      const hud = hudRef.current;
+      if (!hud) return;
+      if (remaining === hudBricks && misses === hudMisses) return;
+      hudBricks = remaining;
+      hudMisses = misses;
+      hud.textContent = `${remaining} left / ${misses} missed`;
+    };
+
     const step = () => {
+      movePaddles();
+
+      // Between the miss and the next serve there is no ball to simulate. The
+      // paddles keep moving through it, so the board never looks frozen.
+      if (!inPlay) {
+        if (performance.now() >= serveAt) serve();
+        return;
+      }
+
       ball.x += ball.dx;
       ball.y += ball.dy;
 
-      // Every wall reflects. There is no fail state on an error page.
+      // Three walls reflect. The fourth is the game.
       if (ball.x - ball.half < 0) {
         ball.x = ball.half;
         ball.dx = Math.abs(ball.dx);
@@ -302,9 +355,16 @@ export function PixelPong({ className = "" }: { className?: string }) {
       if (ball.y - ball.half < 0) {
         ball.y = ball.half;
         ball.dy = Math.abs(ball.dy);
-      } else if (ball.y + ball.half > height) {
-        ball.y = height - ball.half;
-        ball.dy = -Math.abs(ball.dy);
+      }
+
+      // Past the bottom edge entirely, not merely touching it, so the ball is
+      // visibly gone rather than clipped at the moment it is lost.
+      if (ball.y - ball.half > height) {
+        inPlay = false;
+        misses++;
+        serveAt = performance.now() + SERVE_DELAY_MS;
+        updateHud();
+        return;
       }
 
       for (const p of paddles) {
@@ -369,11 +429,23 @@ export function PixelPong({ className = "" }: { className?: string }) {
       if (flipX) ball.dx = -ball.dx;
       if (flipY) ball.dy = -ball.dy;
 
+      if (flipX || flipY) {
+        // A thinning board speeds up. Applied through `normalise`, so the ramp
+        // changes the ball's pace without touching the angle it is travelling.
+        speed = baseSpeed * (1 + SPEED_RAMP * ((total - remaining) / (total || 1)));
+        normalise();
+        updateHud();
+      }
+
       if (remaining <= 0 && !announced) {
         announced = true;
         setCleared(true);
       }
+    };
 
+    /** Runs whether or not a ball is in play, so a miss does not freeze the
+        board while the next serve is pending. */
+    const movePaddles = () => {
       if (player) {
         if (keys.left) targetX -= KEY_STEP;
         if (keys.right) targetX += KEY_STEP;
@@ -381,13 +453,13 @@ export function PixelPong({ className = "" }: { className?: string }) {
         player.x += (targetX - player.x) * PLAYER_LERP;
       }
 
+      // The AI chases the last known ball position, which during a serve pause
+      // is wherever it went off the bottom. That is the correct thing to do:
+      // they drift back toward the middle rather than snapping.
       for (const p of paddles) {
         if (p.player) continue;
         if (p.vertical) {
-          const want = Math.max(
-            0,
-            Math.min(height - p.h, ball.y - p.h / 2)
-          );
+          const want = Math.max(0, Math.min(height - p.h, ball.y - p.h / 2));
           p.y += (want - p.y) * AI_LERP;
         } else {
           const want = Math.max(0, Math.min(width - p.w, ball.x - p.w / 2));
@@ -407,13 +479,15 @@ export function PixelPong({ className = "" }: { className?: string }) {
 
       // Square, not the reference's arc. Nothing else on this site is round,
       // and the ball is the same shape as the brick it destroys.
-      ctx.fillStyle = palette.live;
-      ctx.fillRect(
-        ball.x - ball.half,
-        ball.y - ball.half,
-        ball.half * 2,
-        ball.half * 2
-      );
+      if (inPlay) {
+        ctx.fillStyle = palette.live;
+        ctx.fillRect(
+          ball.x - ball.half,
+          ball.y - ball.half,
+          ball.half * 2,
+          ball.half * 2
+        );
+      }
 
       for (const p of paddles) {
         ctx.fillStyle = p.player ? palette.live : palette.machine;
@@ -554,14 +628,23 @@ export function PixelPong({ className = "" }: { className?: string }) {
       <canvas
         ref={canvasRef}
         tabIndex={0}
-        aria-label="Pong. Move the paddle with the left and right arrow keys and knock out the 404."
+        aria-label="A game. Move the paddle with the left and right arrow keys to keep the ball up and knock out the 404. Miss it and a new ball is served."
         className="absolute inset-0 z-0 h-full w-full touch-none"
+      />
+
+      {/* The data face, same as every other number on the site. Hidden from
+          assistive tech: it changes on most frames of a rally, and the state
+          that actually matters is announced by the line below. */}
+      <p
+        ref={hudRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 left-0 z-10 font-mono text-micro text-muted"
       />
 
       <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-center text-center">
         <h1
           ref={headingRef}
-          className="font-display text-[clamp(3.5rem,16vw,9rem)] leading-none font-bold tracking-[0.08em] text-foreground"
+          className="font-display text-[clamp(4.5rem,20vw,12rem)] leading-none font-bold tracking-[0.08em] text-foreground"
         >
           404
         </h1>
