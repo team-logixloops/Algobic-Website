@@ -11,7 +11,7 @@ import { BrandMask } from "@/components/ui/brand-mask";
  */
 export function StartCta() {
   return (
-    <section className="mx-auto max-w-[92rem] px-[max(1rem,4vw)]">
+    <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <div className="reveal border border-line bg-surface px-[clamp(1.25rem,4vw,3.5rem)] py-[clamp(2rem,6vw,4rem)] text-center">
         {/* The mark, whole, signing the one decision on the page. Wide enough
             that the shatter bars still read; below roughly 5rem they collapse

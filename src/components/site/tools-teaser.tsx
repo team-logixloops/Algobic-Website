@@ -14,7 +14,7 @@ export function ToolsTeaser() {
   const pages = comparisons();
 
   return (
-    <section className="mx-auto max-w-[92rem] px-[max(1rem,4vw)]">
+    <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <h2 className="eyebrow text-eyebrow">Which tool for what</h2>
         <Link

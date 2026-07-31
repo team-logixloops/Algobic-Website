@@ -13,7 +13,7 @@ import { formatUpdated, SITE } from "@/lib/site";
 export function LandingFooter() {
   return (
     <footer className="border-t border-line">
-      <div className="mx-auto flex max-w-[92rem] flex-col gap-2 px-[max(1rem,4vw)] py-[clamp(1.5rem,4vw,2.25rem)] font-mono text-micro text-muted sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex max-w-[110rem] flex-col gap-2 px-[max(1rem,4vw)] py-[clamp(1.5rem,4vw,2.25rem)] font-mono text-micro text-muted sm:flex-row sm:items-center sm:justify-between">
         <p>
           {SITE.legalName}, a {SITE.parent} company
         </p>

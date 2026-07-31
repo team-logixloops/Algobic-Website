@@ -83,9 +83,13 @@
      steps track negative: positive tracking on it reads as a logo, not prose. */
   /* The 2rem floor is for a 240px KaiOS viewport, where a 44px floor left
      about six characters per line. 9vw takes over above roughly 356px. */
-  --text-display-xl: clamp(2rem, 9vw, 7.5rem);
-  --text-display-xl--line-height: 0.92;
-  --text-display-xl--letter-spacing: -0.02em;
+  /* The headline is the page. It runs to the measure, not to a comfortable
+     size: at 13vw a desktop reader gets letterforms about 190px tall, which is
+     the point at which Orbitron stops being a typeface being used and starts
+     being the thing you are looking at. Leading goes under 1 to match. */
+  --text-display-xl: clamp(2.5rem, 13vw, 12rem);
+  --text-display-xl--line-height: 0.84;
+  --text-display-xl--letter-spacing: -0.035em;
   --text-display-xl--font-weight: 700;
 
   --text-display-l: clamp(1.75rem, 4vw, 3rem);

@@ -9,7 +9,7 @@ import { formatUpdated, SITE } from "@/lib/site";
 export function SiteFooter() {
   return (
     <footer className="border-t border-line">
-      <div className="mx-auto max-w-[92rem] px-[max(1rem,4vw)] pb-[max(1.5rem,4vh)]">
+      <div className="mx-auto max-w-[110rem] px-[max(1rem,4vw)] pb-[max(1.5rem,4vh)]">
         <Seam />
 
         <div className="grid gap-[clamp(2rem,5vw,3.5rem)] sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)]">

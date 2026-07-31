@@ -37,7 +37,7 @@ export function Hero() {
         <GlitchField />
       </div>
 
-      <div className="mx-auto grid max-w-[92rem] items-start gap-[clamp(2.5rem,6vw,4.5rem)] px-[max(1rem,4vw)] pt-[clamp(3rem,9vw,6rem)] pb-[clamp(2rem,6vw,4rem)] lg:grid-cols-[1.05fr_1fr]">
+      <div className="mx-auto grid max-w-[110rem] items-start gap-[clamp(2.5rem,6vw,4.5rem)] px-[max(1rem,4vw)] pt-[clamp(3rem,9vw,6rem)] pb-[clamp(2rem,6vw,4rem)] lg:grid-cols-[1.05fr_1fr]">
         <div>
           <p className="eyebrow text-eyebrow rise">Build before they do</p>
 

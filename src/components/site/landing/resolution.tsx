@@ -18,10 +18,14 @@ import { InstagramTrapdoor } from "@/components/ui/instagram-trapdoor";
 export function Resolution() {
   return (
     <section className="border-t border-line bg-surface">
-      <div className="mx-auto flex max-w-[92rem] flex-col items-center px-[max(1rem,4vw)] py-[clamp(3rem,9vw,6.5rem)] text-center">
+      <div className="mx-auto flex max-w-[110rem] flex-col items-center px-[max(1rem,4vw)] py-[clamp(3rem,9vw,6.5rem)] text-center">
         <h2 className="eyebrow text-eyebrow">Where this goes</h2>
 
-        <AssemblingMark className="mt-[clamp(1.75rem,4.5vw,3rem)] w-[clamp(9rem,26vw,17rem)] text-foreground" />
+        {/* Big enough to be the thing you are looking at rather than a mark
+            signing off a block. This is the only place the animal appears
+            whole and it is the last thing on the page; at 17rem it read as a
+            footer logo, which is the opposite of an arrival. */}
+        <AssemblingMark className="mt-[clamp(1.75rem,4.5vw,3.5rem)] w-[clamp(13rem,42vw,32rem)] text-foreground" />
 
         <p className="reveal-bounded mt-[clamp(1.75rem,4.5vw,3rem)] max-w-[19ch] font-display text-display-l text-balance text-foreground">
           The thing you scrolled past is still buildable.

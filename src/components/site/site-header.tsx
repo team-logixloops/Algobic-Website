@@ -15,7 +15,7 @@ import { PRIMARY_NAV } from "@/lib/nav";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-background/90 backdrop-blur-sm supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex max-w-[92rem] flex-col gap-2 px-[max(1rem,4vw)] py-3 sm:flex-row sm:items-center sm:gap-6">
+      <div className="mx-auto flex max-w-[110rem] flex-col gap-2 px-[max(1rem,4vw)] py-3 sm:flex-row sm:items-center sm:gap-6">
         <div className="flex items-center justify-between gap-4 sm:flex-1">
           <Link
             href="/"

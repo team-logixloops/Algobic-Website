@@ -16,7 +16,7 @@ import { WHY_NOW } from "@/lib/evidence";
  */
 export function WhyNow() {
   return (
-    <section className="mx-auto max-w-[92rem] px-[max(1rem,4vw)]">
+    <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <h2 className="eyebrow text-eyebrow">Why now</h2>
 
       <p className="reveal mt-[clamp(1.25rem,3vw,2rem)] max-w-[18ch] font-display text-display-l text-balance text-foreground">

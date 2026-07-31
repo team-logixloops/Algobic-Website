@@ -32,7 +32,7 @@ const REFUSALS = [
 
 export function WhatThisIsNot() {
   return (
-    <section className="mx-auto max-w-[92rem] px-[max(1rem,4vw)]">
+    <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <h2 className="eyebrow text-eyebrow">What this is not</h2>
 
       <dl className="mt-[clamp(1.5rem,4vw,2.5rem)] grid gap-x-[clamp(2rem,5vw,4rem)] lg:grid-cols-2">

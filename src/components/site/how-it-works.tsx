@@ -38,7 +38,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="mx-auto max-w-[92rem] px-[max(1rem,4vw)]">
+    <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <h2 className="eyebrow text-eyebrow">How it works</h2>
 
       <ol className="mt-[clamp(1.75rem,4.5vw,3rem)] grid gap-x-[clamp(1.5rem,4vw,3.5rem)] sm:grid-cols-3">

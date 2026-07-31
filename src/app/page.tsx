@@ -2,6 +2,7 @@ import { LandingFooter } from "@/components/site/landing/landing-footer";
 import { LandingHeader } from "@/components/site/landing/landing-header";
 import { LandingHero } from "@/components/site/landing/landing-hero";
 import { Resolution } from "@/components/site/landing/resolution";
+import { TheCount } from "@/components/site/landing/the-count";
 import { WhyNow } from "@/components/site/landing/why-now";
 import { HowItWorks } from "@/components/site/how-it-works";
 import { TheGap } from "@/components/site/the-gap";
@@ -45,6 +46,9 @@ export default function Home() {
             across the whole document, in the one element with no content to
             compete with. Nothing announces it and nothing depends on noticing
             it. */}
+        <Seam shards={3} />
+        <TheCount />
+
         <Seam shards={3} />
         <TheGap />
 

@@ -37,7 +37,7 @@ const LINES = [
 
 export function TheGap() {
   return (
-    <section className="mx-auto max-w-[92rem] px-[max(1rem,4vw)]">
+    <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
       <h2 className="eyebrow text-eyebrow">The gap</h2>
 
       <div className="mt-[clamp(1.5rem,4vw,2.5rem)] flex flex-col gap-[clamp(1.75rem,4.5vw,3rem)]">

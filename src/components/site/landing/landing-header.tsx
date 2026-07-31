@@ -31,7 +31,7 @@ export function LandingHeader() {
    */
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-background">
-      <div className="mx-auto flex max-w-[92rem] items-center justify-between gap-4 px-[max(1rem,4vw)] py-[clamp(0.625rem,1.5vw,0.875rem)]">
+      <div className="mx-auto flex max-w-[110rem] items-center justify-between gap-4 px-[max(1rem,4vw)] py-[clamp(0.625rem,1.5vw,0.875rem)]">
         <BrandMask
           mark="wordmark"
           label={SITE.name}
