@@ -1,11 +1,12 @@
-"use client";
-
 import InstagramIcon from "@/components/ui/instagram-icon";
+import { SITE } from "@/lib/site";
 
-const HANDLE = "algobic.in";
-const URL = "https://www.instagram.com/algobic.in?igsh=cWlsZXNtZDJmOW1v";
+/* Read from SITE rather than restated here. This is the only live external
+   link on the site and it had two sources of truth. */
+const HANDLE = SITE.instagramHandle;
+const URL = SITE.instagram;
 
-/** Static twin of the animated icon — the halves that ride the doors apart. */
+/** Static twin of the animated icon: the halves that ride the doors apart. */
 function Glyph() {
   return (
     <svg
@@ -33,7 +34,10 @@ export function InstagramTrapdoor() {
       target="_blank"
       rel="noreferrer noopener"
       className="trapdoor"
-      aria-label={`Follow ${HANDLE} on Instagram`}
+      /* Says where it goes and that it leaves the site. The handle is revealed
+         visually when the doors part, but a screen reader user never sees that,
+         and neither group should have to discover a new tab by landing in one. */
+      aria-label={`Follow @${HANDLE} on Instagram, opens in a new tab`}
     >
       <span className="trapdoor__reveal">
         <InstagramIcon size={34} strokeWidth={1.6} />
