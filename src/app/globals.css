@@ -1,15 +1,68 @@
 @import "tailwindcss";
 
-/* Tailwind v4 has no `darkMode: "class"` config — the variant is declared here. */
+/* Tailwind v4 has no `darkMode: "class"` config. The variant is declared here. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
+/* ---------------------------------------------------------------------------
+   Two palettes, each declared exactly once.
+
+   The selector lists are the whole mechanism. `.ground-flip` marks a block that
+   runs the opposite theme's colours: a light reader gets the dark values
+   verbatim and a dark reader gets the light ones. `.dark .ground-flip` outranks
+   `.ground-flip` on specificity, so one pair of blocks flips in both
+   directions.
+
+   Written this way so the landing page can invert a single screen without
+   introducing a third palette or one new pairing to measure. Every value below
+   was checked with a contrast checker on 2026-07-31 against both of its
+   grounds; an inverted block reuses those same numbers rather than inventing
+   colours nobody has measured.
+
+   `@theme inline` maps Tailwind's `--color-*` to these by reference rather than
+   by value, which is what lets a scoped override reach `bg-background` and
+   `text-muted` inside the flipped block.
+--------------------------------------------------------------------------- */
+
+:root,
+.dark .ground-flip {
   --background: #f7f5f2;
   --foreground: #0b0a0c;
   --muted: #6b6560;
   --line: #ddd7ce;
+  /* 2.44:1 on this background. Under the 3:1 floor WCAG 1.4.11 sets for
+     graphical objects, so on paper it carries no text and no meaning at any
+     size. It fills, tints and decorates only. */
   --accent: #ff7712;
+  /* Panels, one step off the paper. */
+  --surface: #efebe4;
+  /* The shatter field's ambient ink, tunable without touching --foreground. */
+  --shard: #b8b0a4;
+  /* 6.26:1 here. Carries everything that has to be read or operated. */
+  --accent-ink: #9c3d06;
+  /* Each theme's second accent is the other theme's first. The toggle trades
+     colours instead of just flipping brightness, and no new hue enters the
+     system: both were already in the mark. */
+  --accent-2: #8847e4;
+}
 
+.dark,
+.ground-flip {
+  --background: #08070c;
+  --foreground: #f2eef7;
+  /* Was #7a7188, measured at 4.35:1 on this ground: under AA for body text,
+     which is exactly what it sets. Lifted to 4.96:1 on background and 4.75:1
+     on surface. Same violet-shifted grey, one step brighter. */
+  --muted: #847a94;
+  --line: #211c2a;
+  /* README: the mark's accent flips to violet on dark grounds. */
+  --accent: #8847e4;
+  --surface: #100d18;
+  --shard: #2e2640;
+  --accent-ink: #a97cf0;
+  --accent-2: #ff7712;
+}
+
+:root {
   /* Theme reveal: the new theme zooms in through the ALGOBIC\ letterforms. */
   --algobic-vt-mask: url("/brand/algobic-wordmark-mask.svg");
   --algobic-vt-duration: 1.4s;
@@ -34,23 +87,55 @@
   );
 }
 
-.dark {
-  --background: #08070c;
-  --foreground: #f2eef7;
-  --muted: #7a7188;
-  --line: #211c2a;
-  /* README: the mark's accent flips to violet on dark grounds. */
-  --accent: #8847e4;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-2: var(--accent-2);
+  --color-surface: var(--surface);
+  --color-shard: var(--shard);
+
   --font-sans: var(--font-inter);
   --font-display: var(--font-orbitron);
+  --font-mono: var(--font-plex-mono);
+
+  /* Seven steps, used simultaneously. Orbitron is already wide, so the display
+     steps track negative: positive tracking on it reads as a logo, not prose. */
+  /* The 2rem floor is for a 240px KaiOS viewport, where a 44px floor left
+     about six characters per line. 9vw takes over above roughly 356px. */
+  /* The headline is the page. It runs to the measure, not to a comfortable
+     size: at 13vw a desktop reader gets letterforms about 190px tall, which is
+     the point at which Orbitron stops being a typeface being used and starts
+     being the thing you are looking at. Leading goes under 1 to match. */
+  --text-display-xl: clamp(2.5rem, 13vw, 12rem);
+  --text-display-xl--line-height: 0.84;
+  --text-display-xl--letter-spacing: -0.035em;
+  --text-display-xl--font-weight: 700;
+
+  --text-display-l: clamp(1.75rem, 4vw, 3rem);
+  --text-display-l--line-height: 1.05;
+  --text-display-l--letter-spacing: -0.01em;
+  --text-display-l--font-weight: 700;
+
+  /* Tracking lifted from the existing COMING SOON treatment, already the
+     brand's voice for small caps. */
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.42em;
+  --text-eyebrow--font-weight: 700;
+
+  --text-data: 0.8125rem;
+  --text-data--line-height: 1.3;
+  --text-data--letter-spacing: 0.02em;
+  --text-data--font-weight: 500;
+
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1.4;
+  --text-micro--letter-spacing: 0.06em;
+  --text-micro--font-weight: 400;
 }
 
 html {
@@ -63,9 +148,698 @@ body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* --accent-ink rather than --accent: the ring is a graphical object and has to
+   clear 3:1 against whatever it sits on. --accent manages 2.44:1 on paper and
+   would be an invisible focus indicator in the light theme. This clears 6.26:1
+   light and 6.53:1 dark, against both background and surface. */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-ink);
   outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+   The slash.
+
+   `ALGOBIC\` ends in an accent backslash, so that diagonal is the only angle
+   on the site. The shatter field is built from horizontal bars; horizontal
+   shards running into one diagonal is a literal description of the mark.
+
+   Deliberately NOT applied by clipping whole sections: that clips focus
+   rings and swallows descendants. It lives in four safe places instead: seam
+   dividers, a corner triangle, a hover wipe, and the literal glyph.
+--------------------------------------------------------------------------- */
+
+:root {
+  --slash-angle: 16deg;
+  /* Corner triangle, sized to match 16deg off vertical (0.5 / 1.75 ≈ tan 16°).
+     Hardcoded rather than computed with tan() to avoid the support gamble. */
+  --corner-w: 0.5rem;
+  --corner-h: 1.75rem;
+}
+
+/* Steep diagonals eat vertical space on a phone. */
+@media (width < 40rem) {
+  :root {
+    --slash-angle: 8deg;
+    --corner-w: 0.3rem;
+    --corner-h: 2.15rem;
+  }
+}
+
+.eyebrow {
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  color: var(--accent-ink);
+  text-transform: uppercase;
+}
+
+/* A panel fill that arrives on the slash. Skew puts the diagonal on the
+   leading edge; translate is the only thing that animates. */
+.wipe {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.wipe::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: -1;
+  width: 135%;
+  background: var(--surface);
+  transform: skewX(calc(-1 * var(--slash-angle))) translateX(-118%);
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wipe:hover::before,
+.wipe:focus-visible::before {
+  transform: skewX(calc(-1 * var(--slash-angle))) translateX(-9%);
+}
+
+/* One corner cut on the slash, filled with the theme's second accent.
+   Declares its own positioning context so it works without `.wipe`. */
+.corner-cut {
+  position: relative;
+}
+
+.corner-cut::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: var(--corner-w);
+  height: var(--corner-h);
+  background: var(--accent-2);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+/* `LandingHeader`'s theme toggle: one corner sliced off flat rather than
+   rounded, so the one persistent control in the chrome is shaped like a piece
+   of the mark instead of a generic icon button. No colour of its own - the
+   button underneath still carries `--line`/`--muted` at rest and
+   `--accent-ink` on hover, unchanged.
+
+   The cut is a fixed 14px by 5px rather than a literal `skewX(var(--slash-
+   angle))`: `clip-path` has no trig function old enough to trust here, and a
+   transform would tilt the icon glyphs inside along with the corner. 14:5 is
+   close enough to the mark's 16deg that it reads as the same angle at a
+   glance, which is what a 40px button needs. */
+.shard-toggle {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 5px, 100% 100%, 0 100%);
+}
+
+/* Nav hover rule. Skew and scale have to live in the same declaration or one
+   silently replaces the other. */
+.nav-rule {
+  transform: skewX(calc(-1 * var(--slash-angle))) scaleX(0);
+  transform-origin: left center;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .nav-rule,
+.group:focus-visible .nav-rule {
+  transform: skewX(calc(-1 * var(--slash-angle))) scaleX(1);
+}
+
+/* The mark's own glyph, quoted after an action. Decorative: the link text
+   carries the meaning.
+
+   Declared inside `@layer utilities` so its `color` does not outrank Tailwind's
+   colour utilities. Unlayered, this rule beat every `group-hover:text-*` on the
+   same element, so hover states that recoloured the glyph silently did nothing. */
+@layer utilities {
+  .slash-glyph {
+    display: inline-block;
+    color: var(--accent-ink);
+    font-family: var(--font-display), ui-sans-serif, sans-serif;
+    transform: translateY(-0.04em);
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+a:hover .slash-glyph,
+button:hover .slash-glyph,
+a:focus-visible .slash-glyph {
+  transform: translate(0.22em, -0.04em);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* `.nav-rule` belongs here too: it animates a skewed scaleX and was the one
+     transition in this block that kept running for readers who asked it not to. */
+  .wipe::before,
+  .slash-glyph,
+  .nav-rule {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion.
+
+   Two rules govern everything here.
+
+   1. Every animation lives inside `prefers-reduced-motion: no-preference`.
+      The default state is finished content, so a failed or disabled animation
+      can never leave text invisible. Opting in is safe; opting out is the
+      baseline.
+   2. Only `opacity` and `transform` animate. Nothing that triggers layout.
+
+      One deliberate exception, declared here so it is not mistaken for an
+      oversight: the theme reveal at the bottom of this file animates
+      `mask-size`, which rasterises. It is the site's signature transition, it
+      runs once per deliberate click rather than on scroll, and it is disabled
+      outright under reduced motion. Nothing else on the site may do this.
+
+   The h1 is deliberately absent from all of this. It is the LCP element, and
+   animating from `opacity: 0` delays the largest paint. It also reads better
+   as the one fixed statement while everything else assembles around it.
+--------------------------------------------------------------------------- */
+
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes algobic-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The shatter motif as motion: a bar draws outward from its left edge. */
+@keyframes algobic-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* The same, descending. The skew is carried in the keyframe rather than in a
+   class, because a transform declared in one place and animated in another
+   silently replaces the other: the skew would survive exactly until the first
+   frame of the animation and then vanish.
+
+   Positive, where every short jog on the site is negative. Direction is
+   unreadable on a fifteen-pixel tick and unmistakable on a four-hundred-pixel
+   one: negative leans the foot of the rule left, which on the first column
+   walks it straight off the side of the panel. Positive leans it the way the
+   mark's own backslash runs and the way the panels arrive, and keeps it inside
+   the column it belongs to. */
+@keyframes algobic-draw-down {
+  from {
+    transform: skewX(var(--slash-angle)) scaleY(0);
+  }
+  to {
+    transform: skewX(var(--slash-angle)) scaleY(1);
+  }
+}
+
+/* Depth. The ground lags behind the content it sits under. */
+@keyframes algobic-parallax {
+  to {
+    transform: translate3d(0, var(--parallax, 14vh), 0);
+  }
+}
+
+/* Transform-only reveal, for cards sitting in a `gap-px` grid whose parent
+   supplies the divider colour. Fading such a card lets the divider bleed
+   through it, so these lift without ever going translucent. */
+@keyframes algobic-lift {
+  from {
+    transform: translateY(0.75rem);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Assembly.
+
+   The mark is a cat coming apart into horizontal bars, leftward. Read the
+   other way it is bars gathering into a cat, which is the whole company in one
+   gesture: scattered attention becoming one finished thing.
+
+   So the artwork is sliced into horizontal bands and each band starts displaced
+   along its own row. The opening frame of this animation is the logo as drawn;
+   the closing frame is the animal whole. Nothing else on the page does this,
+   and it happens once, at the end.
+
+   translate3d only: no layout, no paint, straight to the compositor. */
+@keyframes algobic-assemble {
+  from {
+    transform: translate3d(var(--from, 0), 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Load-time entrance, for above-the-fold content only. Set --d per element
+     to place it in the sequence. */
+  .rise {
+    animation: algobic-rise 620ms var(--ease-out-quint) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  .draw {
+    transform-origin: left center;
+    animation: algobic-draw 420ms var(--ease-out-expo) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  /* Scroll-driven reveal for everything below the fold, so entrances are not
+     wasted on content nobody has reached yet. No JS, no observer.
+
+     Duration is required by the shorthand but ignored once a timeline is
+     attached; scroll position drives progress instead. Browsers without
+     `animation-timeline` fall through this block and simply show the content. */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: algobic-rise 1s linear both;
+      animation-timeline: view();
+      animation-range: entry var(--r, 4%) cover var(--r-end, 26%);
+    }
+
+    .reveal-lift {
+      animation: algobic-lift 1s linear both;
+      animation-timeline: view();
+      animation-range: entry var(--r, 4%) cover var(--r-end, 26%);
+    }
+
+    /* The same gesture turned ninety degrees, for a rule that descends rather
+       than crosses. "How it works" owns a whole screen and the distance between
+       a step and its outcome is most of that screen; the descending rule is
+       what makes the distance read as a path rather than as a gap. Skewed to
+       the slash like every other jog on the site, so it arrives leaning. */
+    .draw-scroll-y {
+      transform-origin: top center;
+      animation: algobic-draw-down 1s linear both;
+      animation-timeline: view();
+      animation-range: entry var(--r, 0%) cover var(--r-end, 34%);
+    }
+
+    /* The seam is the site's signature, so it draws rather than fades. Scroll
+       position pulls the rule across, which is the slash arriving. */
+    .draw-scroll {
+      transform-origin: left center;
+      animation: algobic-draw 1s linear both;
+      animation-timeline: view();
+      /* Reads `--r` so siblings sitting at the same y can be staggered. Without
+         it, three leaders in one grid row share identical geometry and draw in
+         lockstep, which is not what a path does. */
+      animation-range: entry var(--r, 0%) cover var(--r-end, 20%);
+    }
+
+    /* Ranges that resolve on entry alone.
+
+       The default `.reveal` range ends at `cover 26%`, which needs the element
+       to keep travelling after it is fully visible. Anything close enough to
+       the end of the document runs out of scroll before it runs out of range
+       and strands part-animated: permanently faded, permanently offset. Content
+       in the last screen of the page uses this instead, which finishes as soon
+       as the element has fully entered. */
+    .reveal-bounded {
+      animation: algobic-rise 1s linear both;
+      animation-timeline: view();
+      animation-range: entry var(--r, 5%) entry var(--r-end, 85%);
+    }
+
+    /* The assembling mark.
+
+       One named timeline on the wrapper, shared by every band. Bands are tall
+       boxes clipped to a sliver and sit at wildly different offsets, so letting
+       each derive its own anonymous `view()` timeline would have them resolve
+       at different scroll positions and the mark would never be whole at once.
+
+       Range ends inside `entry` for the same reason `.reveal-bounded` does:
+       this is the last thing on the page and it has to finish. */
+    .assemble-root {
+      view-timeline-name: --algobic-assemble;
+      view-timeline-axis: block;
+    }
+
+    /* Unsupported browsers and reduced-motion readers never enter this block,
+       so the state they get is the assembled mark. A failure here can only ever
+       leave the artwork finished, never broken. */
+    .assemble {
+      animation: algobic-assemble 1s linear both;
+      animation-timeline: --algobic-assemble;
+      animation-range: entry 12% entry 92%;
+    }
+  }
+
+  /* Parallax runs off the document scroll rather than element visibility, so it
+     needs `scroll()` rather than `view()`. Composited transform only, which is
+     what keeps it off the main thread. */
+  @supports (animation-timeline: scroll()) {
+    /* No `will-change`. A scroll-driven transform animation is already
+       promoted for its whole life, so the hint bought nothing and permanently
+       retained a composited layer spanning the hero plus its overscan, with a
+       live canvas inside it. */
+    .parallax {
+      animation: algobic-parallax 1s linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100vh;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The build wall's resting state.
+
+   `/builds` reserves three screens of scroll for a plane of tiles that starts
+   dim, tilted and 700px high, and is rotated into place by scroll position.
+   Two readers never get that scroll: someone who asked for reduced motion, and
+   someone whose JavaScript did not arrive. Both must be handed the finished
+   wall, and both must be handed it during parse rather than after hydration,
+   or the correction is itself the flash it was meant to prevent.
+
+   `!important` is load-bearing, not lazy: motion writes `transform` and
+   `opacity` as inline styles on these elements, and an unflagged rule loses to
+   an inline one every time.
+
+   Rows two and three are dropped rather than wrapped. Wrapping them was tried
+   and measured: at 1440px two tiles fit per line, so fifteen of them became a
+   4773px column of decoration that says nothing. Every tile in the wall is
+   `aria-hidden` and carries no fact, so the honest static version is one
+   clipped band of it under the header, not eight screens of it.
+
+   Declared twice rather than merged. The two conditions are genuinely
+   different - one is a media query, one is a class on the root - and CSS has
+   no way to share a declaration block between them without a preprocessor.
+--------------------------------------------------------------------------- */
+
+/* No `transform-style: preserve-3d` here, deliberately. This element also sets
+   `overflow: hidden`, and per CSS Transforms 2 a grouping property forces the
+   used value of `transform-style` back to `flat`, so declaring it was a no-op
+   that read as load-bearing. `perspective` is what actually tilts the plane,
+   and it applies to children regardless. */
+.wall__shell {
+  height: 300vh;
+  perspective: 1000px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall__shell {
+    height: auto;
+    perspective: none;
+  }
+
+  .wall__plane,
+  .wall__tile {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .wall__row {
+    margin-bottom: 0;
+  }
+
+  .wall__row:nth-child(n + 2) {
+    display: none;
+  }
+}
+
+html:not(.js) .wall__shell {
+  height: auto;
+  perspective: none;
+}
+
+html:not(.js) :is(.wall__plane, .wall__tile) {
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+html:not(.js) .wall__row {
+  margin-bottom: 0;
+}
+
+html:not(.js) .wall__row:nth-child(n + 2) {
+  display: none;
+}
+
+/* 0.42em tracking is right at desktop and profligate on a 240px screen, where
+   an eyebrow can eat three lines. */
+@media (width < 40rem) {
+  .eyebrow {
+    letter-spacing: 0.22em;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The 404 board's two-state line.
+
+   Both states ship in the HTML and CSS picks one. The server cannot know a
+   reader's motion preference, so deciding this in React would render the
+   invitation, hydrate, and flip: one frame of an offer that reduced-motion
+   readers were never being made, since for them nothing on the board moves.
+--------------------------------------------------------------------------- */
+
+.pong-line [data-state="done"] {
+  display: none;
+}
+
+.pong-line[data-cleared="true"] [data-state="play"] {
+  display: none;
+}
+
+.pong-line[data-cleared="true"] [data-state="done"] {
+  display: inline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pong-line [data-state="play"] {
+    display: none;
+  }
+
+  .pong-line [data-state="done"] {
+    display: inline;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The slab.
+
+   The card shape the ten interior pages share. It is deliberately not a card:
+   no radius, no shadow, no elevation, no hover scale. `design.md` section 4
+   spends the site's whole boldness budget on one angle, so a hovered slab is
+   allowed exactly three gestures and all three are that angle:
+
+   1. `.wipe` fills the block from the left on the slash. Already declared above
+      and reused verbatim rather than re-implemented.
+   2. `.slab__lead` draws an accent rule across the top edge, left to right, the
+      same gesture the seam and every step leader on the site already make.
+   3. `.slab__glyph` steps right, which the `.slash-glyph` rule above already
+      does for the mark's own backslash.
+
+   No lift and no shadow, on purpose. Every other hover treatment on this site
+   is a thing arriving along the diagonal; a card rising toward the reader is a
+   fourth vocabulary, and it is the one that could have come off any template.
+
+   The lead sits on the block's own top border rather than above it: `-top-px`
+   is on the element in markup, because an absolutely positioned child resolves
+   against the padding box, which starts below the border.
+--------------------------------------------------------------------------- */
+
+/* Four gestures, staggered, and every one of them is the diagonal.
+
+   The first version ran two of these at 3px and 240ms and the answer, fairly,
+   was that nothing appeared to happen. A hover state has to be felt at a
+   glance from across the room or it is not feedback, it is a detail. So: the
+   ground arrives on the slash, an accent rule draws along the top edge, a
+   second accent bar grows up the leading edge from the floor, and the text
+   itself steps along the same vector the panels travel. They are offset in
+   time, so the row assembles rather than switching on. */
+
+.slab__lead {
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slab:hover .slab__lead,
+.slab:focus-visible .slab__lead {
+  transform: scaleX(1);
+}
+
+/* The leading edge, growing from the floor. `--accent-2` rather than
+   `--accent`, so the two rules that meet at the corner are the theme's two
+   accents rather than one colour drawn twice: the toggle trades them, which is
+   the same trade the whole palette makes. */
+.slab__edge {
+  transform-origin: left bottom;
+  transform: scaleY(0);
+  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1) 60ms;
+}
+
+.slab:hover .slab__edge,
+.slab:focus-visible .slab__edge {
+  transform: scaleY(1);
+}
+
+/* The step. 0.55rem across and 0.16rem down is the 16deg the mark owns, so the
+   row leans the way the panels arrive rather than sliding flat to the right.
+   Transform only: no layout, straight to the compositor. */
+.slab__shift {
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1) 40ms;
+}
+
+.slab:hover .slab__shift,
+.slab:focus-visible .slab__shift {
+  transform: translate3d(0.55rem, 0.16rem, 0);
+}
+
+/* The mono meta row dims at rest and comes up on hover, so the facts read as
+   the reward for looking rather than as noise competing with the title. */
+.slab__meta {
+  transition: color 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slab:hover .slab__meta,
+.slab:focus-visible .slab__meta {
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slab__lead,
+  .slab__edge,
+  .slab__shift,
+  .slab__meta {
+    transition: none;
+  }
+
+  /* Reduced motion is a request about movement, not about feedback. Both rules
+     still appear on hover, they just stop travelling to get there, and the text
+     stops stepping entirely. */
+  .slab:hover .slab__lead,
+  .slab:focus-visible .slab__lead {
+    transform: scaleX(1);
+  }
+
+  .slab:hover .slab__edge,
+  .slab:focus-visible .slab__edge {
+    transform: scaleY(1);
+  }
+
+  .slab:hover .slab__shift,
+  .slab:focus-visible .slab__shift {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Tap target, expanded without touching layout.
+
+   `design.md` section 8 sets a 44px floor on mobile and the chrome was quietly
+   breaking it: the header wordmark link measured 144x13, because the wordmark's
+   own aspect ratio is 11.5:1 and the anchor shrink-wraps it. The nav links were
+   27px for the same kind of reason.
+
+   Padding cannot fix either without growing the bar, which is 41px tall by
+   design and sits above a hero that is measured against it. So the hit area is
+   expanded by a pseudo-element that is out of flow: 44px tall, centred on the
+   element, contributing nothing to layout and painting nothing.
+
+   Only ever applied to elements whose horizontal neighbours are far enough away
+   that a taller box cannot swallow an adjacent control. In the header the
+   wordmark and the toggle sit at opposite ends of a flex row and the nav items
+   are separated by at least 16px of gap.
+--------------------------------------------------------------------------- */
+
+.tap-44 {
+  position: relative;
+}
+
+.tap-44::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+
+/* ---------------------------------------------------------------------------
+   The ticker.
+
+   `design.md` section 9 cut the marquee from the homepage, and that decision
+   stands: there it scrolled build titles that were already listed directly
+   above it, so it repeated rather than informed and failed the section 0 test.
+
+   It is allowed on `/start` and `/answers` because on those two pages it is the
+   only place its contents appear. `/start` names five first builds and the
+   ticker carries the other ten from the topic bank, which are real candidates
+   nobody has to scroll a list to see. `/answers` carries the twelve questions
+   as a strip you can grab. Delete either and the reader loses items, which is
+   the test.
+
+   Motion lives in `marquee.tsx`; everything static lives here.
+
+   The edge mask is the one piece of decoration in this block and it earns its
+   place mechanically: an infinite strip that stops dead at the viewport edge
+   reads as clipped content rather than as continuing motion, and readers try to
+   scroll the page sideways to reach it.
+--------------------------------------------------------------------------- */
+
+.ticker {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+/* Two readers never get the animation: someone who asked for reduced motion,
+   and someone whose JavaScript did not arrive. Both are handed the same thing,
+   and it has to be operable rather than merely visible, because a strip of
+   items that runs past the viewport with no way to reach the far end is worse
+   than no strip at all. So it becomes an ordinary horizontally scrollable row,
+   keyboard reachable, with the mask off so nothing at the edges is dimmed.
+
+   `html:not(.js)` is set during parse by the head script in `layout.tsx`, for
+   the same reason the theme is: a correction applied after hydration is itself
+   the flash it was meant to prevent. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+html:not(.js) .ticker {
+  overflow-x: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* The duplicate half of the strip exists only so the loop has something to run
+   into. Without motion it is the same items printed twice, so it goes. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker__clone {
+    display: none;
+  }
+}
+
+html:not(.js) .ticker__clone {
+  display: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -73,7 +847,7 @@ body {
 
    The incoming theme scales up out of nothing into the ALGOBIC\ wordmark,
    holds long enough to read, then blows straight through the viewport. One
-   axis of motion — scale — and no travel. Vector mask, crisp at every size.
+   axis of motion (scale) and no travel. Vector mask, crisp at every size.
 --------------------------------------------------------------------------- */
 
 ::view-transition-group(root) {
@@ -152,13 +926,16 @@ body {
    Pointers that cannot hover get the reveal played once on load instead.
 --------------------------------------------------------------------------- */
 
+/* --accent-ink, not --accent: this colour draws both the glyph and the handle,
+   and the glyph is the only thing identifying an interactive link. At 2.44:1 on
+   paper it was an icon nobody with low vision could find. */
 .trapdoor {
   position: relative;
   display: block;
   overflow: hidden;
   width: min(260px, 76vw);
   height: 76px;
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 /* Closed, the glyph is whole. Its halves are clipped copies sitting either
@@ -279,5 +1056,370 @@ body {
     .trapdoor__reveal {
       opacity: 1;
     }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The preloader.
+
+   Runs on every arrival at the home page, and on no other route. The decision
+   is read by the inline head script in `layout.tsx` and written to `<html>` as
+   `data-preload`, for the same reason the theme is: a decision made in React is
+   a decision made after the browser has already painted the answer it is about
+   to correct. `preloader.tsx` re-stamps the attribute on a return to `/` that
+   never reloaded the document, which is the one arrival the script cannot see.
+
+   Every piece of timing lives here rather than in the component. `preloader.tsx`
+   owns the canvas field and the scramble, and nothing else; both are
+   decoration. The consequence is that a hydration failure cannot trap anyone
+   behind a full-screen panel. The sentence still fades in, the ground still
+   wipes off on the slash, the overlay still clears, and the hero still gets its
+   entrance on time, with no JavaScript beyond the head script that set the
+   attribute. With JavaScript off entirely the attribute is never set and there
+   is no overlay at all.
+
+   The exit is two gestures at once. The content leaves on the wind, along the
+   same vector the dashes travel. The ground leaves on the slash, in the same
+   direction `.wipe` runs, so the page is uncovered from the top left and the
+   hero is the first thing exposed.
+--------------------------------------------------------------------------- */
+
+:root {
+  --preload-total: 2200ms;
+  /* The point at which the sentence is fully legible. `preloader.tsx` holds the
+     same number: the two have to agree or the accent full stop arrives against
+     a line that is still noise. */
+  --preload-resolve: 1100ms;
+  --preload-content-out: 1700ms;
+  --preload-sheet-out: 1780ms;
+  /* The hero starts arriving while the ground is still leaving. Waiting for a
+     clear screen puts a beat of nothing between the two. */
+  --preload-handoff: 1900ms;
+}
+
+/* Default is absent, so the markup costs every other route nothing but its
+   bytes, and a document with no script never shows a cover it cannot remove. */
+.preloader {
+  display: none;
+}
+
+/* Never takes a click. The page underneath stays operable for the two seconds
+   this is up. */
+html[data-preload] .preloader {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  overflow: clip;
+  pointer-events: none;
+  animation: preload-clear 1ms linear var(--preload-total) both;
+}
+
+/* Wider than the viewport and offset left, so the skew cannot open a wedge at
+   either corner.
+
+   The overhang is 60% rather than the 30% this started at, and the number comes
+   out of the geometry rather than out of taste. Skewing about the centre moves
+   the top edge sideways by tan(angle) * height / 2, which at 16deg is 0.143H,
+   so an overhang of 0.3W leaves the top left corner uncovered as soon as the
+   viewport is taller than 2.09 times its width. Phones clear that ratio and are
+   saved only by the 8deg breakpoint below 40rem; a tall narrow desktop window
+   is not. At 0.6W the ratio it survives is 4.18, which nothing is. */
+.preloader__sheet {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 220%;
+  background: var(--background);
+  transform: translate3d(0, 0, 0)
+    skewX(calc(-1 * var(--slash-angle)));
+}
+
+.preloader__content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-inline: clamp(1rem, 5vw, 3rem);
+}
+
+.preloader__field {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* The data face, not the display face. Two reasons, and the first one is not
+   taste: a proportional face changes width every time a character is swapped,
+   so a scramble set in Orbitron jitters horizontally for its whole run. Plex
+   Mono holds the line still. It is also the face this site already uses for
+   machine output, and a preloader is machine output.
+
+   `pre-wrap` rather than `pre`: at 240px the sentence does not fit on one line,
+   and the only break opportunities are the spaces, which never scramble. */
+.preloader__line {
+  position: relative;
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: clamp(0.875rem, 2.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  color: var(--foreground);
+  white-space: pre-wrap;
+  text-align: center;
+}
+
+/* Invisible until `preloader.tsx` says otherwise. The markup ships as the
+   finished sentence so a reader with no JavaScript at all still gets it (see
+   above: with JS off entirely `data-preload` is never set and none of this
+   runs), but a reader whose JS is merely slow to hydrate would otherwise see
+   that finished sentence sitting still on a bare ground for however long
+   hydration takes, which on a cold dev bundle is well past a second. Nothing
+   is worth showing before the component can scramble it.
+
+   The 1ms-animation-with-a-delay is the same backstop `preload-clear` uses
+   below: if the component's own bundle fails after the head script already
+   set the attribute, this still reveals the line, just at the last possible
+   moment rather than never. */
+html[data-preload] .preloader__line {
+  opacity: 0;
+  animation: preload-line-in 1ms linear var(--preload-total) both;
+}
+
+/* The real reveal, once `preloader.tsx` has actually mounted and is about to
+   start painting. Outranks the backstop above on specificity. */
+.preloader.preloader--ready .preloader__line {
+  opacity: 1;
+  animation: none;
+}
+
+/* Unresolved characters sit one step back from the resolved ones, so the
+   sentence condenses forward rather than arriving over a blank.
+
+   `--shard` was the first choice, on the grounds that it names the shatter
+   field's ink and the noise should be made of the same material as the dashes.
+   It is #2e2640 on #08070c, which is 1.40:1, and at that ratio the scramble
+   stopped reading as noise and started reading as characters going missing.
+   `--muted` is the same idea at 4.96:1 dark and 4.90:1 light: dim, and legibly
+   there. */
+.preloader__line [data-dud] {
+  color: var(--muted);
+}
+
+/* The one coloured mark, on the one piece of punctuation. Same gesture as the
+   headline's accented full stop, at a twentieth of the size. */
+.preloader__stop {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Covers the scramble's first frames. If this file's component arrives before
+     the fade completes nobody sees the resting sentence; if it arrives after,
+     the component declines to scramble at all rather than pulling a legible
+     line back into noise. */
+  html[data-preload] .preloader.preloader--ready .preloader__line {
+    animation: preload-line-in 300ms var(--ease-out-quint) both;
+  }
+
+  html[data-preload] .preloader__stop {
+    animation: preload-stop-in 220ms var(--ease-out-quint)
+      var(--preload-resolve) both;
+  }
+
+  html[data-preload] .preloader__content {
+    animation: preload-content-out 260ms var(--ease-out-quint)
+      var(--preload-content-out) both;
+  }
+
+  html[data-preload] .preloader__sheet {
+    animation: preload-sheet-out 420ms var(--ease-out-expo)
+      var(--preload-sheet-out) both;
+  }
+
+  /* The hero handoff.
+
+     Offsetting the delay rather than pausing the animation, so this resolves on
+     a clock rather than on an attribute somebody has to remember to remove.
+     Pausing would mean the entrances stay frozen forever if the script that set
+     the attribute is the last JavaScript that ever runs, and a permanently
+     paused `.rise` is permanently invisible text.
+
+     Placed after the block that declares `.rise` and `.draw`, and outranking it
+     on specificity. */
+  html[data-preload] .rise,
+  html[data-preload] .draw {
+    animation-delay: calc(var(--d, 0ms) + var(--preload-handoff));
+  }
+}
+
+/* One still frame, held for the same beat, leaving on opacity alone. The field
+   paints once and the sentence is never scrambled, so what a reader who asked
+   for less motion gets is a poster rather than an animation. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-preload] .preloader__content,
+  html[data-preload] .preloader__sheet {
+    animation: preload-fade-out 320ms linear var(--preload-content-out) both;
+  }
+}
+
+@keyframes preload-line-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes preload-stop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 4vw across and 1.15vw down is 16deg, the same vector the dashes travel. */
+@keyframes preload-content-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(4vw, 1.15vw, 0);
+  }
+}
+
+/* The leading edge has to leave by the right, and it is the bottom of that edge
+   that lags: the skew pulls it back by tan(angle) * height / 2. Clearing takes
+   1.6W of travel for the overhang plus 0.143H for the lag, and 92% of a sheet
+   2.2W wide is 2.02W, which covers every viewport up to about three times as
+   tall as it is wide. */
+@keyframes preload-sheet-out {
+  from {
+    transform: translate3d(0, 0, 0) skewX(calc(-1 * var(--slash-angle)));
+  }
+  to {
+    transform: translate3d(92%, 0, 0) skewX(calc(-1 * var(--slash-angle)));
+  }
+}
+
+@keyframes preload-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* The backstop, and the one piece of this that runs whatever else has failed:
+   a 1ms animation whose whole job is its 2200ms delay.
+
+   It animated `visibility` first, and that is what this replaces. Measured over
+   the real clock, the overlay was still `visibility: visible` at a currentTime
+   of 2201, which is the animation already finished and filling forwards. CSS
+   gives `visibility` a special interpolation, in which any progress that is not
+   exactly the endpoint resolves to `visible` if either end is, and a one
+   millisecond active phase is entirely boundary. Opacity has no such rule, it
+   is the property the rest of this file animates anyway, and an element at zero
+   opacity is not painted. */
+@keyframes preload-clear {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The curtain.
+
+   The footer does not scroll into view. It is already there, underneath, and
+   the document slides off it.
+
+   Seven panels have been closing over each other by the time anyone reaches
+   this, so scroll position has stopped meaning progress and the reader has no
+   way to tell from motion whether anything is left. This is the one gesture
+   that says nothing further will close over this: it ends the stack's grammar
+   rather than continuing it. Delete it and the footer is a section,
+   indistinguishable from an eighth panel whose hinge failed. That is the
+   argument `design.md` section 6 requires for any scroll-driven exception, and
+   it is recorded there too.
+
+   The whole mechanism is the two rules below. A `clip-path` other than `none`
+   makes an element a containing block for its fixed-position descendants, so
+   the panel is fixed to the viewport and clipped to the wrapper's box at the
+   same time. The wrapper rises with the document; the panel never moves; the
+   intersection grows. No scroll listener, no ScrollTrigger, no rAF, no ref, and
+   nothing added to the timeline graph `HingeStack` already has to refresh. The
+   footer is a Server Component and stays one.
+
+   This is the only place on the site that clips a whole section, which the
+   slash block above bans on the grounds that clipping swallows focus rings. The
+   exemption is bought rather than assumed: the clip lands on the viewport edge,
+   and the panel's padding keeps every focusable element more than the 3px
+   `outline-offset` clear of it. Nothing focusable ever approaches the boundary.
+--------------------------------------------------------------------------- */
+
+.curtain {
+  position: relative;
+  /* `HingeStack` writes `zIndex: 1..7` onto the panels and `main` creates no
+     stacking context, so those panels compete with this element at the root.
+     Above all seven, below the sticky header at 50. */
+  z-index: 10;
+  height: 100svh;
+  clip-path: inset(0);
+}
+
+.curtain__panel {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100svh;
+  /* Clears the sticky header. With the curtain fully drawn this panel fills the
+     viewport including the strip the bar occupies, and the bar is opaque and
+     outranks it, so without this the first seam is behind it. 4.25rem is the
+     bar's real height, the same figure `HingePanel` subtracts, plus room to not
+     sit flush against it.
+
+     Declared here rather than as a utility on the element because it is a
+     property of being fixed. In flow the footer scrolls under the header like
+     anything else and the same padding is a wasted inch. */
+  padding-top: clamp(4.5rem, 9vw, 6.5rem);
+}
+
+/* Three ways out, and all three land on the same thing: the footer in normal
+   flow at its natural height.
+
+   A reader who asked for less motion is the obvious one. The other two are
+   about height, because a fixed panel cannot size its own wrapper: whatever
+   does not fit inside one viewport is cropped and unreachable. Four link
+   columns, a colophon and the wordmark do not fit a portrait phone, and they do
+   not fit a landscape one either. Phones are this audience's device, so the
+   curtain is a thing most readers will never see. That is the price of a
+   mechanism with no JavaScript in it, and it is worth paying over a footer that
+   loses its last two rows at 320px.
+
+   Both thresholds are 40rem, which is the breakpoint the rest of this file
+   already turns on. The height one was 34rem first and that was measured wrong:
+   at 544px the content clears by about twenty pixels, which is no margin at all
+   for a face that has not loaded yet. */
+@media (prefers-reduced-motion: reduce), (width < 40rem), (height < 40rem) {
+  .curtain {
+    height: auto;
+    clip-path: none;
+  }
+
+  .curtain__panel {
+    position: static;
+    height: auto;
+    padding-top: 0;
   }
 }

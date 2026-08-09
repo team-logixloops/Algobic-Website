@@ -30,6 +30,8 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${SITE.url}/sitemap.xml`,
-    host: SITE.url,
+    /* Bare hostname. The Host directive takes a host, not a URL, and a
+       scheme-prefixed value is discarded rather than honoured. */
+    host: new URL(SITE.url).host,
   };
 }
