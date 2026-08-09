@@ -49,19 +49,25 @@ function BuildRow({ build }: { build: Build }) {
 /**
  * Zero state.
  *
- * Not a skeleton and not placeholder rows: it states what a build page will
- * contain, which is true information the reader can act on. When the first
- * build ships this is replaced by rows, not edited.
+ * Not a skeleton and not placeholder rows. It states what a build page
+ * contains, which is true information a reader can act on, and it leads with
+ * the part nobody else publishes rather than with a count of what is missing.
+ *
+ * Rewritten 2026-08-09. It opened on "First builds land this month", which is
+ * honest and is also the sentence a reader remembers: a site announcing that it
+ * has nothing. The information is the same; what changed is which fact is the
+ * headline. When the first build ships this is replaced by rows, not edited.
  */
 function NoBuildsYet() {
   return (
     <div className="border border-line bg-surface p-[clamp(1.25rem,3vw,2rem)]">
       <p className="font-display text-[clamp(1rem,1.8vw,1.25rem)] leading-snug font-bold text-foreground">
-        First builds land this month.
+        Every prompt. Every break. The bill.
       </p>
-      <p className="mt-2 max-w-[38ch] text-sm text-muted">
-        Nothing here is a mockup. A build appears once it is shipped, reachable
-        and free to run.
+      <p className="mt-2 max-w-[44ch] text-sm text-muted">
+        Everybody posts the version that worked. A build page here is the whole
+        path, including the twenty minutes where the model was confidently
+        wrong.
       </p>
 
       <dl className="mt-[clamp(1.25rem,3vw,1.75rem)] flex flex-col gap-3">
@@ -81,7 +87,17 @@ function NoBuildsYet() {
   );
 }
 
-export function BuildIndex({ count = 3 }: { count?: number }) {
+export function BuildIndex({
+  count = 3,
+  showAllLink = true,
+}: {
+  count?: number;
+  /**
+   * Off on `/builds` itself. The link is a teaser affordance, and a page
+   * linking to itself is the same dead control the header refuses to ship.
+   */
+  showAllLink?: boolean;
+}) {
   const builds = latestBuilds(count);
 
   if (builds.length === 0) return <NoBuildsYet />;
@@ -94,15 +110,17 @@ export function BuildIndex({ count = 3 }: { count?: number }) {
         ))}
       </ul>
 
-      <Link
-        href="/builds"
-        className="group mt-5 inline-flex items-baseline gap-2 font-mono text-data text-accent-ink uppercase"
-      >
-        All builds
-        <span aria-hidden="true" className="slash-glyph">
-          \
-        </span>
-      </Link>
+      {showAllLink ? (
+        <Link
+          href="/builds"
+          className="group mt-5 inline-flex items-baseline gap-2 font-mono text-data text-accent-ink uppercase"
+        >
+          All builds
+          <span aria-hidden="true" className="slash-glyph">
+            \
+          </span>
+        </Link>
+      ) : null}
     </div>
   );
 }

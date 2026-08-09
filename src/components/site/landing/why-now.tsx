@@ -17,17 +17,35 @@ import { WHY_NOW } from "@/lib/evidence";
  */
 export function WhyNow() {
   return (
-    <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
-      <h2 className="eyebrow text-eyebrow">Why now</h2>
+    /* Statement beside the evidence rather than above it, once there is room
+       for two columns.
 
-      <p className="mt-[clamp(1.25rem,3vw,2rem)] max-w-[18ch] font-display text-display-l text-balance text-foreground">
+       Stacked, this section came out about 250px taller than the screen it now
+       owns, and a panel taller than its screen gets its last row eaten by the
+       next panel closing over it. The last row here is the one that admits its
+       own source has no method, which is the single row that most has to be
+       read. Sideways it fits, and a display line anchored against a column of
+       data reads as evidence being presented rather than as a heading with a
+       table under it. */
+    <div className="grid gap-x-[clamp(2rem,5vw,4rem)] gap-y-[clamp(1.25rem,3vw,2rem)] lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
+      {/* Not `text-display-l`. At 48px the word "disappeared." is 340px wide on
+          its own, which overran the column and collided with the figures beside
+          it, and it was competing with 38px mono numerals for the same
+          attention. This line supports the evidence rather than heading it: the
+          panel's own name is the eyebrow above. */}
+      <p className="max-w-[18ch] font-display text-[clamp(1.5rem,2.6vw,2.25rem)] leading-[1.08] font-bold tracking-[-0.01em] text-balance text-foreground">
         The requirement disappeared.
       </p>
 
       {/* One trigger for the whole table: the rows land in sequence as the
           block arrives rather than each waiting for its own turn, so it reads
           as a table being printed rather than as five separate reveals. */}
-      <Rise stagger={0.09} y={34} select="[data-row]" className="mt-[clamp(2rem,5vw,3.5rem)]">
+      <Rise
+        stagger={0.09}
+        y={34}
+        select="[data-row]"
+        className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2"
+      >
         <dl className="border-b border-line">
         {WHY_NOW.map((row) => {
           const uncertain = row.confidence !== "verified";
@@ -36,7 +54,7 @@ export function WhyNow() {
             <div
               key={row.figure}
               data-row
-              className="grid gap-x-[clamp(1rem,3vw,2.5rem)] gap-y-3 border-t border-line py-[clamp(1.25rem,3vw,2rem)] sm:grid-cols-[minmax(6.5rem,9rem)_minmax(0,1fr)] lg:grid-cols-[10rem_minmax(0,1fr)_16rem]"
+              className="grid gap-x-[clamp(1rem,2.5vw,2rem)] gap-y-2 border-t border-line py-[clamp(0.75rem,1.6vw,1.125rem)] sm:grid-cols-[minmax(6.5rem,9rem)_minmax(0,1fr)] lg:grid-cols-[9.5rem_minmax(0,1fr)_13.5rem]"
             >
               {/* Mono at display size, tabular so the column holds a straight
                   left edge whatever the digits are. Muted on the row that has
@@ -74,18 +92,13 @@ export function WhyNow() {
                   is pinned to column two, under the claim it belongs to.
                   Without the explicit `col-start-2` it auto-places into the
                   figure column and wraps to three lines in a 9rem gutter. */}
+              {/* Broken onto two lines on purpose rather than left to wrap.
+                  Set as one run it came to 232px in this face at this tracking,
+                  overran a 13.5rem column and broke between "30 Jul" and
+                  "2026", which reads as a layout accident. Who, then when. */}
               <dd className="font-mono text-micro text-muted sm:col-start-2 lg:col-start-3 lg:text-right">
-                {row.source ? (
-                  <>
-                    {row.source} <span aria-hidden="true">·</span> verified{" "}
-                    {row.asOf}
-                  </>
-                ) : (
-                  <>
-                    Verified at source <span aria-hidden="true">·</span>{" "}
-                    {row.asOf}
-                  </>
-                )}
+                <span className="lg:block">{row.source ?? "At source"}</span>{" "}
+                <span className="lg:block">verified {row.asOf}</span>
               </dd>
             </div>
           );
@@ -93,9 +106,12 @@ export function WhyNow() {
         </dl>
       </Rise>
 
-      <p className="mt-[clamp(1.5rem,4vw,2.5rem)] max-w-[42ch] font-display text-[clamp(1.0625rem,2vw,1.5rem)] leading-snug font-bold text-balance text-foreground">
+      {/* Placed under the statement it concludes rather than under the table,
+          so the left column reads top to bottom as claim then verdict and the
+          right column is nothing but the evidence in between. */}
+      <p className="max-w-[26ch] font-display text-[clamp(1.0625rem,1.8vw,1.375rem)] leading-snug font-bold text-balance text-foreground lg:col-start-1 lg:row-start-2 lg:self-end">
         The tools solved capability. Nobody solved activation.
       </p>
-    </section>
+    </div>
   );
 }

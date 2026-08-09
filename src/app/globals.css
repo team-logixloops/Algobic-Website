@@ -233,6 +233,21 @@ body {
   clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 
+/* `LandingHeader`'s theme toggle: one corner sliced off flat rather than
+   rounded, so the one persistent control in the chrome is shaped like a piece
+   of the mark instead of a generic icon button. No colour of its own - the
+   button underneath still carries `--line`/`--muted` at rest and
+   `--accent-ink` on hover, unchanged.
+
+   The cut is a fixed 14px by 5px rather than a literal `skewX(var(--slash-
+   angle))`: `clip-path` has no trig function old enough to trust here, and a
+   transform would tilt the icon glyphs inside along with the corner. 14:5 is
+   close enough to the mark's 16deg that it reads as the same angle at a
+   glance, which is what a 40px button needs. */
+.shard-toggle {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 5px, 100% 100%, 0 100%);
+}
+
 /* Nav hover rule. Skew and scale have to live in the same declaration or one
    silently replaces the other. */
 .nav-rule {
@@ -522,17 +537,20 @@ a:focus-visible .slash-glyph {
    no way to share a declaration block between them without a preprocessor.
 --------------------------------------------------------------------------- */
 
+/* No `transform-style: preserve-3d` here, deliberately. This element also sets
+   `overflow: hidden`, and per CSS Transforms 2 a grouping property forces the
+   used value of `transform-style` back to `flat`, so declaring it was a no-op
+   that read as load-bearing. `perspective` is what actually tilts the plane,
+   and it applies to children regardless. */
 .wall__shell {
   height: 300vh;
   perspective: 1000px;
-  transform-style: preserve-3d;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .wall__shell {
     height: auto;
     perspective: none;
-    transform-style: flat;
   }
 
   .wall__plane,
@@ -553,7 +571,6 @@ a:focus-visible .slash-glyph {
 html:not(.js) .wall__shell {
   height: auto;
   perspective: none;
-  transform-style: flat;
 }
 
 html:not(.js) :is(.wall__plane, .wall__tile) {
@@ -606,6 +623,223 @@ html:not(.js) .wall__row:nth-child(n + 2) {
   .pong-line [data-state="done"] {
     display: inline;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   The slab.
+
+   The card shape the ten interior pages share. It is deliberately not a card:
+   no radius, no shadow, no elevation, no hover scale. `design.md` section 4
+   spends the site's whole boldness budget on one angle, so a hovered slab is
+   allowed exactly three gestures and all three are that angle:
+
+   1. `.wipe` fills the block from the left on the slash. Already declared above
+      and reused verbatim rather than re-implemented.
+   2. `.slab__lead` draws an accent rule across the top edge, left to right, the
+      same gesture the seam and every step leader on the site already make.
+   3. `.slab__glyph` steps right, which the `.slash-glyph` rule above already
+      does for the mark's own backslash.
+
+   No lift and no shadow, on purpose. Every other hover treatment on this site
+   is a thing arriving along the diagonal; a card rising toward the reader is a
+   fourth vocabulary, and it is the one that could have come off any template.
+
+   The lead sits on the block's own top border rather than above it: `-top-px`
+   is on the element in markup, because an absolutely positioned child resolves
+   against the padding box, which starts below the border.
+--------------------------------------------------------------------------- */
+
+/* Four gestures, staggered, and every one of them is the diagonal.
+
+   The first version ran two of these at 3px and 240ms and the answer, fairly,
+   was that nothing appeared to happen. A hover state has to be felt at a
+   glance from across the room or it is not feedback, it is a detail. So: the
+   ground arrives on the slash, an accent rule draws along the top edge, a
+   second accent bar grows up the leading edge from the floor, and the text
+   itself steps along the same vector the panels travel. They are offset in
+   time, so the row assembles rather than switching on. */
+
+.slab__lead {
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slab:hover .slab__lead,
+.slab:focus-visible .slab__lead {
+  transform: scaleX(1);
+}
+
+/* The leading edge, growing from the floor. `--accent-2` rather than
+   `--accent`, so the two rules that meet at the corner are the theme's two
+   accents rather than one colour drawn twice: the toggle trades them, which is
+   the same trade the whole palette makes. */
+.slab__edge {
+  transform-origin: left bottom;
+  transform: scaleY(0);
+  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1) 60ms;
+}
+
+.slab:hover .slab__edge,
+.slab:focus-visible .slab__edge {
+  transform: scaleY(1);
+}
+
+/* The step. 0.55rem across and 0.16rem down is the 16deg the mark owns, so the
+   row leans the way the panels arrive rather than sliding flat to the right.
+   Transform only: no layout, straight to the compositor. */
+.slab__shift {
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1) 40ms;
+}
+
+.slab:hover .slab__shift,
+.slab:focus-visible .slab__shift {
+  transform: translate3d(0.55rem, 0.16rem, 0);
+}
+
+/* The mono meta row dims at rest and comes up on hover, so the facts read as
+   the reward for looking rather than as noise competing with the title. */
+.slab__meta {
+  transition: color 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slab:hover .slab__meta,
+.slab:focus-visible .slab__meta {
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slab__lead,
+  .slab__edge,
+  .slab__shift,
+  .slab__meta {
+    transition: none;
+  }
+
+  /* Reduced motion is a request about movement, not about feedback. Both rules
+     still appear on hover, they just stop travelling to get there, and the text
+     stops stepping entirely. */
+  .slab:hover .slab__lead,
+  .slab:focus-visible .slab__lead {
+    transform: scaleX(1);
+  }
+
+  .slab:hover .slab__edge,
+  .slab:focus-visible .slab__edge {
+    transform: scaleY(1);
+  }
+
+  .slab:hover .slab__shift,
+  .slab:focus-visible .slab__shift {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Tap target, expanded without touching layout.
+
+   `design.md` section 8 sets a 44px floor on mobile and the chrome was quietly
+   breaking it: the header wordmark link measured 144x13, because the wordmark's
+   own aspect ratio is 11.5:1 and the anchor shrink-wraps it. The nav links were
+   27px for the same kind of reason.
+
+   Padding cannot fix either without growing the bar, which is 41px tall by
+   design and sits above a hero that is measured against it. So the hit area is
+   expanded by a pseudo-element that is out of flow: 44px tall, centred on the
+   element, contributing nothing to layout and painting nothing.
+
+   Only ever applied to elements whose horizontal neighbours are far enough away
+   that a taller box cannot swallow an adjacent control. In the header the
+   wordmark and the toggle sit at opposite ends of a flex row and the nav items
+   are separated by at least 16px of gap.
+--------------------------------------------------------------------------- */
+
+.tap-44 {
+  position: relative;
+}
+
+.tap-44::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+
+/* ---------------------------------------------------------------------------
+   The ticker.
+
+   `design.md` section 9 cut the marquee from the homepage, and that decision
+   stands: there it scrolled build titles that were already listed directly
+   above it, so it repeated rather than informed and failed the section 0 test.
+
+   It is allowed on `/start` and `/answers` because on those two pages it is the
+   only place its contents appear. `/start` names five first builds and the
+   ticker carries the other ten from the topic bank, which are real candidates
+   nobody has to scroll a list to see. `/answers` carries the twelve questions
+   as a strip you can grab. Delete either and the reader loses items, which is
+   the test.
+
+   Motion lives in `marquee.tsx`; everything static lives here.
+
+   The edge mask is the one piece of decoration in this block and it earns its
+   place mechanically: an infinite strip that stops dead at the viewport edge
+   reads as clipped content rather than as continuing motion, and readers try to
+   scroll the page sideways to reach it.
+--------------------------------------------------------------------------- */
+
+.ticker {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+/* Two readers never get the animation: someone who asked for reduced motion,
+   and someone whose JavaScript did not arrive. Both are handed the same thing,
+   and it has to be operable rather than merely visible, because a strip of
+   items that runs past the viewport with no way to reach the far end is worse
+   than no strip at all. So it becomes an ordinary horizontally scrollable row,
+   keyboard reachable, with the mask off so nothing at the edges is dimmed.
+
+   `html:not(.js)` is set during parse by the head script in `layout.tsx`, for
+   the same reason the theme is: a correction applied after hydration is itself
+   the flash it was meant to prevent. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+html:not(.js) .ticker {
+  overflow-x: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* The duplicate half of the strip exists only so the loop has something to run
+   into. Without motion it is the same items printed twice, so it goes. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker__clone {
+    display: none;
+  }
+}
+
+html:not(.js) .ticker__clone {
+  display: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -828,11 +1062,12 @@ html:not(.js) .wall__row:nth-child(n + 2) {
 /* ---------------------------------------------------------------------------
    The preloader.
 
-   Shown on the first load of a browser session and never again inside it. The
-   decision is read by the inline head script in `layout.tsx` and written to
-   `<html>` as `data-preload`, for the same reason the theme is: a decision made
-   in React is a decision made after the browser has already painted the answer
-   it is about to correct.
+   Runs on every arrival at the home page, and on no other route. The decision
+   is read by the inline head script in `layout.tsx` and written to `<html>` as
+   `data-preload`, for the same reason the theme is: a decision made in React is
+   a decision made after the browser has already painted the answer it is about
+   to correct. `preloader.tsx` re-stamps the attribute on a return to `/` that
+   never reloaded the document, which is the one arrival the script cannot see.
 
    Every piece of timing lives here rather than in the component. `preloader.tsx`
    owns the canvas field and the scramble, and nothing else; both are
@@ -862,14 +1097,14 @@ html:not(.js) .wall__row:nth-child(n + 2) {
   --preload-handoff: 1900ms;
 }
 
-/* Default is absent, so the markup costs a repeat visit nothing but its bytes. */
+/* Default is absent, so the markup costs every other route nothing but its
+   bytes, and a document with no script never shows a cover it cannot remove. */
 .preloader {
   display: none;
 }
 
 /* Never takes a click. The page underneath stays operable for the two seconds
-   this is up, and `ShardCursor` at `z-index: 100` is simply covered rather than
-   inverting itself against a ground it was never measured on. */
+   this is up. */
 html[data-preload] .preloader {
   display: block;
   position: fixed;
@@ -881,13 +1116,21 @@ html[data-preload] .preloader {
 }
 
 /* Wider than the viewport and offset left, so the skew cannot open a wedge at
-   either corner. */
+   either corner.
+
+   The overhang is 60% rather than the 30% this started at, and the number comes
+   out of the geometry rather than out of taste. Skewing about the centre moves
+   the top edge sideways by tan(angle) * height / 2, which at 16deg is 0.143H,
+   so an overhang of 0.3W leaves the top left corner uncovered as soon as the
+   viewport is taller than 2.09 times its width. Phones clear that ratio and are
+   saved only by the 8deg breakpoint below 40rem; a tall narrow desktop window
+   is not. At 0.6W the ratio it survives is 4.18, which nothing is. */
 .preloader__sheet {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -30%;
-  width: 160%;
+  left: -60%;
+  width: 220%;
   background: var(--background);
   transform: translate3d(0, 0, 0)
     skewX(calc(-1 * var(--slash-angle)));
@@ -928,10 +1171,41 @@ html[data-preload] .preloader {
   text-align: center;
 }
 
-/* Unresolved characters are the field's colour, so the sentence condenses out
-   of the same material the dashes are made of rather than arriving over it. */
+/* Invisible until `preloader.tsx` says otherwise. The markup ships as the
+   finished sentence so a reader with no JavaScript at all still gets it (see
+   above: with JS off entirely `data-preload` is never set and none of this
+   runs), but a reader whose JS is merely slow to hydrate would otherwise see
+   that finished sentence sitting still on a bare ground for however long
+   hydration takes, which on a cold dev bundle is well past a second. Nothing
+   is worth showing before the component can scramble it.
+
+   The 1ms-animation-with-a-delay is the same backstop `preload-clear` uses
+   below: if the component's own bundle fails after the head script already
+   set the attribute, this still reveals the line, just at the last possible
+   moment rather than never. */
+html[data-preload] .preloader__line {
+  opacity: 0;
+  animation: preload-line-in 1ms linear var(--preload-total) both;
+}
+
+/* The real reveal, once `preloader.tsx` has actually mounted and is about to
+   start painting. Outranks the backstop above on specificity. */
+.preloader.preloader--ready .preloader__line {
+  opacity: 1;
+  animation: none;
+}
+
+/* Unresolved characters sit one step back from the resolved ones, so the
+   sentence condenses forward rather than arriving over a blank.
+
+   `--shard` was the first choice, on the grounds that it names the shatter
+   field's ink and the noise should be made of the same material as the dashes.
+   It is #2e2640 on #08070c, which is 1.40:1, and at that ratio the scramble
+   stopped reading as noise and started reading as characters going missing.
+   `--muted` is the same idea at 4.96:1 dark and 4.90:1 light: dim, and legibly
+   there. */
 .preloader__line [data-dud] {
-  color: var(--shard);
+  color: var(--muted);
 }
 
 /* The one coloured mark, on the one piece of punctuation. Same gesture as the
@@ -945,7 +1219,7 @@ html[data-preload] .preloader {
      the fade completes nobody sees the resting sentence; if it arrives after,
      the component declines to scramble at all rather than pulling a legible
      line back into noise. */
-  html[data-preload] .preloader__line {
+  html[data-preload] .preloader.preloader--ready .preloader__line {
     animation: preload-line-in 300ms var(--ease-out-quint) both;
   }
 
@@ -1020,14 +1294,17 @@ html[data-preload] .preloader {
   }
 }
 
-/* 88% of a sheet 160% as wide as the viewport carries its left edge from -30vw
-   to 111vw, which clears the screen with the skew accounted for. */
+/* The leading edge has to leave by the right, and it is the bottom of that edge
+   that lags: the skew pulls it back by tan(angle) * height / 2. Clearing takes
+   1.6W of travel for the overhang plus 0.143H for the lag, and 92% of a sheet
+   2.2W wide is 2.02W, which covers every viewport up to about three times as
+   tall as it is wide. */
 @keyframes preload-sheet-out {
   from {
     transform: translate3d(0, 0, 0) skewX(calc(-1 * var(--slash-angle)));
   }
   to {
-    transform: translate3d(88%, 0, 0) skewX(calc(-1 * var(--slash-angle)));
+    transform: translate3d(92%, 0, 0) skewX(calc(-1 * var(--slash-angle)));
   }
 }
 
@@ -1040,14 +1317,109 @@ html[data-preload] .preloader {
   }
 }
 
-/* Discrete, and the only property here that is neither opacity nor transform.
-   It runs once, at the end, on an element that is already fully transparent,
-   and it exists so the canvas stops being composited at all. */
+/* The backstop, and the one piece of this that runs whatever else has failed:
+   a 1ms animation whose whole job is its 2200ms delay.
+
+   It animated `visibility` first, and that is what this replaces. Measured over
+   the real clock, the overlay was still `visibility: visible` at a currentTime
+   of 2201, which is the animation already finished and filling forwards. CSS
+   gives `visibility` a special interpolation, in which any progress that is not
+   exactly the endpoint resolves to `visible` if either end is, and a one
+   millisecond active phase is entirely boundary. Opacity has no such rule, it
+   is the property the rest of this file animates anyway, and an element at zero
+   opacity is not painted. */
 @keyframes preload-clear {
   from {
-    visibility: visible;
+    opacity: 1;
   }
   to {
-    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The curtain.
+
+   The footer does not scroll into view. It is already there, underneath, and
+   the document slides off it.
+
+   Seven panels have been closing over each other by the time anyone reaches
+   this, so scroll position has stopped meaning progress and the reader has no
+   way to tell from motion whether anything is left. This is the one gesture
+   that says nothing further will close over this: it ends the stack's grammar
+   rather than continuing it. Delete it and the footer is a section,
+   indistinguishable from an eighth panel whose hinge failed. That is the
+   argument `design.md` section 6 requires for any scroll-driven exception, and
+   it is recorded there too.
+
+   The whole mechanism is the two rules below. A `clip-path` other than `none`
+   makes an element a containing block for its fixed-position descendants, so
+   the panel is fixed to the viewport and clipped to the wrapper's box at the
+   same time. The wrapper rises with the document; the panel never moves; the
+   intersection grows. No scroll listener, no ScrollTrigger, no rAF, no ref, and
+   nothing added to the timeline graph `HingeStack` already has to refresh. The
+   footer is a Server Component and stays one.
+
+   This is the only place on the site that clips a whole section, which the
+   slash block above bans on the grounds that clipping swallows focus rings. The
+   exemption is bought rather than assumed: the clip lands on the viewport edge,
+   and the panel's padding keeps every focusable element more than the 3px
+   `outline-offset` clear of it. Nothing focusable ever approaches the boundary.
+--------------------------------------------------------------------------- */
+
+.curtain {
+  position: relative;
+  /* `HingeStack` writes `zIndex: 1..7` onto the panels and `main` creates no
+     stacking context, so those panels compete with this element at the root.
+     Above all seven, below the sticky header at 50. */
+  z-index: 10;
+  height: 100svh;
+  clip-path: inset(0);
+}
+
+.curtain__panel {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100svh;
+  /* Clears the sticky header. With the curtain fully drawn this panel fills the
+     viewport including the strip the bar occupies, and the bar is opaque and
+     outranks it, so without this the first seam is behind it. 4.25rem is the
+     bar's real height, the same figure `HingePanel` subtracts, plus room to not
+     sit flush against it.
+
+     Declared here rather than as a utility on the element because it is a
+     property of being fixed. In flow the footer scrolls under the header like
+     anything else and the same padding is a wasted inch. */
+  padding-top: clamp(4.5rem, 9vw, 6.5rem);
+}
+
+/* Three ways out, and all three land on the same thing: the footer in normal
+   flow at its natural height.
+
+   A reader who asked for less motion is the obvious one. The other two are
+   about height, because a fixed panel cannot size its own wrapper: whatever
+   does not fit inside one viewport is cropped and unreachable. Four link
+   columns, a colophon and the wordmark do not fit a portrait phone, and they do
+   not fit a landscape one either. Phones are this audience's device, so the
+   curtain is a thing most readers will never see. That is the price of a
+   mechanism with no JavaScript in it, and it is worth paying over a footer that
+   loses its last two rows at 320px.
+
+   Both thresholds are 40rem, which is the breakpoint the rest of this file
+   already turns on. The height one was 34rem first and that was measured wrong:
+   at 544px the content clears by about twenty pixels, which is no margin at all
+   for a face that has not loaded yet. */
+@media (prefers-reduced-motion: reduce), (width < 40rem), (height < 40rem) {
+  .curtain {
+    height: auto;
+    clip-path: none;
+  }
+
+  .curtain__panel {
+    position: static;
+    height: auto;
+    padding-top: 0;
   }
 }

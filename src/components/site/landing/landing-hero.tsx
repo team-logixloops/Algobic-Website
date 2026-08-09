@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Parallax } from "@/components/ui/scroll-fx";
-import { ShatterGL } from "@/components/ui/shatter-gl";
 import { SplitHeadline } from "@/components/ui/split-headline";
 import { SITE } from "@/lib/site";
 
@@ -12,11 +11,14 @@ import { SITE } from "@/lib/site";
  * page is an argument about scale, so the opening screen is the largest thing
  * on the site by a wide margin and everything after it is quiet by comparison.
  *
+ * The base of the hinge stack, and the only panel nothing swings in over from
+ * above. It is pinned from the first pixel of scroll, so the field does not
+ * scroll away: it dissolves in place while the next panel closes over it.
+ *
  * Three layers moving at three rates, which is the whole depth budget: the
- * field dissolves as the hero leaves, the headline drifts slowest, the eyebrow
- * and the paragraph drift fastest. Nothing here scales or rotates. The mark is
- * built from horizontal bars and one diagonal, so vertical travel is the only
- * motion the page is allowed.
+ * field dissolves as the hero is covered, the headline drifts slowest, the
+ * eyebrow and the paragraph drift fastest. Nothing here scales. Rotation
+ * belongs to the panel, not to anything inside it.
  */
 
 /** The sentence, broken by hand. At 190px there is one good arrangement. */
@@ -43,22 +45,17 @@ const SHARDS = [
 ] as const;
 
 export function LandingHero() {
-  /* 4.25rem is the sticky header's real height: a 40px control plus its
-   * padding. Subtracting a round 4rem left the section four pixels taller than
-   * the space under the header, which is exactly enough to clip the last line
-   * of the paragraph pinned to its foot.
-   *
-   * The paragraph is pinned only from lg up. On a phone `justify-between`
-   * across a full viewport put four hundred pixels of nothing between the
-   * headline and the copy, which reads as a broken layout rather than as space.
-   */
   return (
-    <section className="relative isolate flex min-h-[calc(100svh-4.25rem)] flex-col overflow-hidden lg:justify-between">
-      <div aria-hidden="true" className="absolute inset-0 -z-20">
-        <ShatterGL />
-      </div>
-
-      <div className="mx-auto w-full max-w-[110rem] px-[max(1rem,4vw)] pt-[clamp(2.5rem,7vw,5rem)]">
+    <>
+      {/* No seam above this one: it is the base of the stack, so there is no
+          leading edge because nothing arrives. It supplies its own top gutter
+          for the same reason. */}
+      {/* Trimmed from 7vw. The headline runs at 13vw and three lines of it plus
+          the closing paragraph is already more than a 900px laptop has under
+          the header, so the padding is what gives. Fixed gutters are the first
+          thing to spend on a screen whose whole argument is the size of the
+          type. */}
+      <div className="pt-[clamp(1.5rem,4vw,3rem)]">
         <Parallax speed={0.55}>
           <p className="eyebrow text-eyebrow rise">{SITE.tagline}</p>
         </Parallax>
@@ -93,11 +90,11 @@ export function LandingHero() {
         </Parallax>
       </div>
 
-      {/* Pinned to the foot of the screen rather than following the headline.
-          The gap between them is the composition: one enormous statement at the
-          top, one quiet paragraph at the bottom, and the field running through
-          the space between. */}
-      <div className="mx-auto w-full max-w-[110rem] px-[max(1rem,4vw)] pt-[clamp(2.5rem,6vw,5rem)] pb-[clamp(1.5rem,3vw,2.25rem)]">
+      {/* Pushed to the foot of the screen by the panel's own `justify-between`
+          rather than following the headline. The gap between them is the
+          composition: one enormous statement at the top, one quiet paragraph at
+          the bottom, and the field running through the space between. */}
+      <div className="pt-[clamp(1.25rem,3vw,2rem)]">
         <Parallax speed={0.5}>
           <p
             className="rise ml-auto max-w-[42ch] text-[clamp(0.95rem,1.35vw,1.125rem)] leading-relaxed text-foreground lg:text-right"
@@ -110,6 +107,6 @@ export function LandingHero() {
           </p>
         </Parallax>
       </div>
-    </section>
+    </>
   );
 }

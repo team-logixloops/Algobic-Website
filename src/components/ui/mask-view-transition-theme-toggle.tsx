@@ -69,12 +69,16 @@ interface MaskThemeToggleProps {
   /** Total length of the reveal. */
   duration?: string;
   className?: string;
+  /** Passthrough for a caller that needs the button itself as the animation
+      target, e.g. a `--d` custom property feeding `.rise`'s entrance delay. */
+  style?: React.CSSProperties;
 }
 
 export function MaskThemeToggle({
   maskUrl,
   duration,
   className = "",
+  style,
 }: MaskThemeToggleProps) {
   const { theme, toggleTheme } = useThemeSystem();
 
@@ -121,6 +125,7 @@ export function MaskThemeToggle({
       onClick={handleToggle}
       aria-label="Switch between light and dark theme"
       className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-line text-muted transition-colors hover:border-accent-ink hover:text-accent-ink sm:h-10 sm:w-10 ${className}`}
+      style={style}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

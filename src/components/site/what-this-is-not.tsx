@@ -33,18 +33,26 @@ const REFUSALS = [
 
 export function WhatThisIsNot() {
   return (
-    <section className="mx-auto max-w-[110rem] px-[max(1rem,4vw)]">
-      <h2 className="eyebrow text-eyebrow">What this is not</h2>
+    /* The densest panel, so it is the one that takes its screen by letting the
+       rows breathe rather than by growing the type. Five refusals set at reading
+       size with air between them is the register this section wants: flat,
+       unemphatic, and long enough that the list is the point. */
+    <Rise stagger={0.07} y={30} select="[data-row]" className="flex flex-1 flex-col justify-center">
+      {/* One column, not two.
 
-      <Rise stagger={0.07} y={30} select="[data-row]" className="mt-[clamp(1.5rem,4vw,2.5rem)]">
-        <dl className="grid gap-x-[clamp(2rem,5vw,4rem)] lg:grid-cols-2">
+          Five items in a two-up grid is three rows and a hole: the last cell is
+          empty, the block sits short in the middle of a screen, and the reader
+          has to decide whether to read across or down. Five full-width rows fill
+          the panel exactly, read in one direction, and give the section the flat
+          unemphatic register it is written in. */}
+      <dl>
         {REFUSALS.map((item) => (
           <div
             key={item.head}
             data-row
-            className="flex flex-col gap-1.5 border-t border-line py-[clamp(1rem,2vw,1.375rem)] sm:flex-row sm:gap-6"
+            className="flex flex-col gap-1.5 border-t border-line py-[clamp(1rem,3vw,2.375rem)] sm:flex-row sm:gap-[clamp(1.5rem,4vw,3rem)]"
           >
-            <dt className="flex shrink-0 items-baseline gap-2.5 sm:w-[13.5rem]">
+            <dt className="flex shrink-0 items-baseline gap-2.5 sm:w-[clamp(13.5rem,22vw,20rem)]">
               {/* U+00D7, not the heavier U+2715. Plex Mono serves no
                   unicode-range covering 2715 and neither does the metric
                   fallback, so it dropped to a last-resort font or to tofu. */}
@@ -58,13 +66,12 @@ export function WhatThisIsNot() {
                 {item.head}
               </span>
             </dt>
-            <dd className="max-w-[46ch] text-[clamp(0.875rem,1.25vw,0.9375rem)] leading-relaxed text-muted">
+            <dd className="max-w-[62ch] text-[clamp(0.9375rem,1.35vw,1.0625rem)] leading-relaxed text-muted">
               {item.body}
             </dd>
           </div>
         ))}
-        </dl>
-      </Rise>
-    </section>
+      </dl>
+    </Rise>
   );
 }

@@ -55,8 +55,37 @@ export const SITE = {
    * Date the page content last actually changed. Bump it by hand when it does.
    * A build-time `new Date()` here would change on every deploy and every
    * request, which is exactly the churn that makes crawlers ignore lastmod.
+   *
+   * Bumped 2026-08-09: ten routes shipped, which is a substantive change by any
+   * reading. Mechanical bumping to fake freshness is what makes the signal
+   * worthless, and it is worth the reminder that this is the one date the whole
+   * site's `lastmod` and `dateModified` derive from.
    */
-  updated: "2026-08-01",
+  updated: "2026-08-09",
+  /**
+   * The domain registered with the analytics provider.
+   *
+   * Plausible keys stats to this string and it has to match the site created in
+   * their dashboard exactly, apex form, no `www` and no scheme. If it does not
+   * match, the script loads, posts, and is discarded silently, which is the
+   * worst failure mode available: everything looks correct and no data arrives.
+   *
+   * Derived from `url` rather than typed twice, so changing the domain cannot
+   * leave analytics pointing at the old one.
+   */
+  analyticsDomain: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.algobic.in")
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/.*$/, ""),
+  /**
+   * First publication. Fixed, and it does not move.
+   *
+   * `Article` schema wants `datePublished` alongside `dateModified`, and the
+   * pair is only a freshness signal while the first half stays honest. A page
+   * whose published date advances with its updated date is a page claiming to
+   * be new every time it is edited.
+   */
+  published: "2026-07-31",
 } as const;
 
 /**

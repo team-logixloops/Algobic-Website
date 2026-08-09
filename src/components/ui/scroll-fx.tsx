@@ -159,22 +159,34 @@ export function DrawRule({ className = "" }: { className?: string }) {
 }
 
 /**
- * Pin a section and scrub a 0-to-1 progress value through it.
+ * Scrub a 0-to-1 progress value across a range and hand it to the caller.
  *
- * The child is a function of that progress, applied by the caller to whatever
- * it wants: a scale, a clip, a band offset. Kept generic because the two places
- * this page pins are doing completely different things with the same mechanism.
+ * The child is a function of that progress, applied to whatever the section
+ * wants: a clip, a scale, a counter-travel. Kept generic rather than baked into
+ * the one section using it, because the interesting part is the wiring and the
+ * wiring is identical wherever it is needed.
  *
- * `distance` is how many viewport heights of scroll the pin consumes.
+ * Pins nothing. This page's panels are already a screen each and the one before
+ * is already held in place by the hinge stack, so a second pin inside one would
+ * be two pins fighting over the same scroll.
+ *
+ * `trigger` names an ancestor to measure instead of this element, resolved with
+ * `closest`. The panels rotate, and a rotated element's measured top is wrong
+ * by up to its own width times the sine of the angle, so anything that has to
+ * line up exactly with a panel measures the panel.
  */
-export function PinScrub({
+export function Scrub({
   children,
-  distance = 1,
+  start = "top bottom",
+  end = "top 35%",
+  trigger,
   onProgress,
   className = "",
 }: {
   children: React.ReactNode;
-  distance?: number;
+  start?: string;
+  end?: string;
+  trigger?: string;
   onProgress: (root: HTMLElement, progress: number) => void;
   className?: string;
 }) {
@@ -191,16 +203,14 @@ export function PinScrub({
 
   useGsap((root) => {
     ScrollTrigger.create({
-      trigger: root,
-      start: "top top",
-      end: `+=${distance * 100}%`,
-      pin: true,
-      pinSpacing: true,
+      trigger: (trigger && root.closest(trigger)) || root,
+      start,
+      end,
       scrub: true,
       onUpdate: (self) => cb.current(root, self.progress),
       onRefresh: (self) => cb.current(root, self.progress),
     });
-  }, ref, [distance]);
+  }, ref, [start, end, trigger]);
 
   return (
     <div ref={ref} className={className}>

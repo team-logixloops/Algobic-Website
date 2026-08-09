@@ -15,17 +15,28 @@ const isDev = process.env.NODE_ENV !== "production";
  * bootstrap payload, the pre-paint theme script and the JSON-LD blocks.
  * Everything else is locked to same-origin.
  */
+/**
+ * The one third-party origin on the site.
+ *
+ * Plausible is allowed on `script-src` and `connect-src` and on nothing else:
+ * it may load its script and post a count, and it may not become a frame, an
+ * image, a font or a form target. Naming it once here keeps the two directives
+ * from drifting apart, which is how an analytics script ends up loading and
+ * then silently failing to report.
+ */
+const ANALYTICS_ORIGIN = "https://plausible.io";
+
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' ${ANALYTICS_ORIGIN}${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+  `connect-src 'self' ${ANALYTICS_ORIGIN}${isDev ? " ws: wss:" : ""}`,
   "manifest-src 'self'",
   "upgrade-insecure-requests",
 ].join("; ");

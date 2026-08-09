@@ -15,6 +15,15 @@ Companion to [`website.md`](website.md) (structure, SEO) and [`brand.md`](brand.
 
 **Not yet done:** `/preview` still exists and still renders the earlier two-column composition. It is `noindex`, so it costs nothing, and it is kept until the founder has seen `/` and is happy. Delete `src/app/preview/` then.
 
+**Shipped 2026-08-01 (`/builds`).** The section root every nav item points at now exists, and it opens on a scroll-driven wall of fifteen tiles. That contradicts one line of this document, which is amended rather than quietly ignored:
+
+| Was | Now | Why |
+|---|---|---|
+| §6 "**Nothing else.** No parallax, no scroll-jacking" | **Parallax is allowed on `/builds`, and only there.** The homepage rules are unchanged: no parallax on `/`, no scroll-jacking anywhere, and the h1 still never animates from `opacity: 0` | The clause was written against decoration, and it already bent once: `a29a0df` shipped a scrubbed page and a WebGL shatter field on `/`. On `/builds` the motion is not decoration. The wall's subject is *how many slots are filled*, and a plane of fifteen tiles rotating into legibility states that count in one gesture before a word is read. §0's test applies and it passes: delete the wall and the reader loses the count |
+| §5 "0 builds: right column shows the one `/work` case study" | **0 builds: fifteen numbered slots, drawn in the mark's geometry, plus the count in text.** No `/work` fallback, because `WORK` is empty too | The fallback assumed a case study existed. Neither array has an entry, so the honest zero state has to be self-describing. Slots are numbered from where the real builds stop, so a build takes slot 01 and nothing renumbers |
+
+Unchanged by this: **no invented titles, no placeholder cards, no stock photography.** A slot is drawn from `--shard` and `--accent`, is labelled `unclaimed`, links nowhere, and is `aria-hidden`. It is not a build pretending to load.
+
 ---
 
 ## 0. THE CONFLICT, RESOLVED
@@ -260,7 +269,25 @@ The homepage ships at **priority 6** in the build order, after builds exist. Des
 | Row hover | Accent wipe along the slash, 220ms | CSS |
 | Marquee | CSS translate loop, paused on hover and under reduced-motion | CSS |
 
-**Nothing else.** No parallax, no scroll-jacking, no counters ticking up, no entrance animation on the headline: the headline is the LCP element and animating it delays paint. `prefers-reduced-motion: reduce` kills every item in rows 3-5 and is already handled for rows 1-2.
+**Nothing else on this page.** No scroll-jacking, no counters ticking up, no entrance animation on the headline: the headline is the LCP element and animating it delays paint. `prefers-reduced-motion: reduce` kills every item in rows 3-5 and is already handled for rows 1-2.
+
+⚠️ **Amended 2026-08-01, see the block at the top of this document.** The blanket ban on parallax now applies to `/` only. `/builds` runs one scroll-driven wall, because there the motion carries the page's single fact rather than dressing it. Any further exception needs the same argument written down: what fact does the motion carry, and does §0's delete-it test still pass.
+
+### Exception 2: the curtain footer, 2026-08-03
+
+`SiteFooter` is fixed under the document and uncovered as the page slides off it. That is a scroll-driven effect on `/`, so it owes the argument above.
+
+**What fact does the motion carry.** Seven panels have been closing over each other, and pinning is what makes that work, so by the last screen scroll position no longer maps to progress: the reader has no way to tell from motion whether anything remains. Being uncovered rather than arriving is the one gesture that says nothing further will close over this. It terminates the stack's grammar instead of continuing it.
+
+**Does the delete-it test pass.** Yes. Delete it and the footer is a section, indistinguishable from an eighth panel whose hinge failed to fire, which is the exact failure mode the reader has been trained by six previous panels to expect.
+
+**What it costs.** Two CSS rules, no JavaScript, no `ScrollTrigger`, no timeline for `HingeStack` to refresh, and `SiteFooter` stays a Server Component. Build output confirms `/` and `/builds` are still fully prerendered.
+
+🔴 **CLS not measured.** The argument for expecting 0.0000 to hold is the same one that made `pinType: "transform"` necessary: the fixed panel is out of flow inside a wrapper of fixed height, so there is no box appearing or disappearing for the layout-instability spec to record. That is reasoning, not a number. **Measure it across one full-page scroll before treating it as settled**, exactly as the 10.14 that motivated `pinType` was measured rather than predicted.
+
+**Where it does not run.** Under `prefers-reduced-motion: reduce`, below `40rem` wide, and below `40rem` tall. A fixed panel cannot size its own wrapper, so anything that does not fit one viewport would be cropped and unreachable, and four link columns plus a colophon plus the wordmark do not fit a phone in either orientation. Phones are this audience's device, so most readers will never see the curtain. That is the price of a mechanism with no JavaScript in it, and it is cheaper than a footer that loses its last two rows at 320px.
+
+**One rule it breaks.** The slash block in `globals.css` bans clipping whole sections, because clipping swallows focus rings and descendants. The curtain is the site's only clipped section. The exemption is bought rather than assumed: the clip lands on the viewport edge, and the panel's padding keeps every focusable element well clear of the 3px `outline-offset`. Nothing focusable approaches the boundary. **No second clipped section without the same measurement.**
 
 ---
 

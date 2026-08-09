@@ -26,6 +26,16 @@ export const metadata: Metadata = {
   title: "Homepage preview",
   description: "Staged homepage. Not published.",
   robots: { index: false, follow: false },
+  /* Self-canonical, added 2026-08-09.
+   *
+   * Without it this route inherits the root layout's `alternates.canonical: "/"`
+   * and declares the homepage as its canonical while also carrying `noindex`.
+   * That pair is contradictory in the one direction that can actually hurt: a
+   * `noindex` page pointing its canonical at a page you very much want indexed
+   * invites an engine to consolidate the two and carry the directive across.
+   * Unlikely, cheap to rule out, and this route is scheduled for deletion
+   * anyway. */
+  alternates: { canonical: "/preview" },
 };
 
 export default function HomepagePreview() {

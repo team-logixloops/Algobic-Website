@@ -31,11 +31,24 @@ const CLUSTER = [
 export function Seam({
   label,
   shards = CLUSTER.length,
+  draw = true,
   className = "",
 }: {
   label?: string;
   /** 0 to 3. Counted down across a page to make the dissolve legible. */
   shards?: number;
+  /**
+   * Whether the long leg draws itself against the scroll.
+   *
+   * Off for the footer, and the reason is mechanical rather than stylistic.
+   * `.draw-scroll` is an `animation-timeline: view()`, and a view timeline needs
+   * its subject to be a box inside the scroller's own subtree. The footer's
+   * content is `position: fixed`, so it is not, and the timeline resolves as
+   * inactive. What an inactive timeline does to an animation filling `both` is
+   * not worth betting a visible rule on, so the one seam that lives in fixed
+   * content asks for a plain hairline instead.
+   */
+  draw?: boolean;
   className?: string;
 }) {
   return (
@@ -77,7 +90,10 @@ export function Seam({
         </span>
       ) : null}
 
-      <span aria-hidden="true" className="draw-scroll h-px flex-1 bg-line" />
+      <span
+        aria-hidden="true"
+        className={`h-px flex-1 bg-line ${draw ? "draw-scroll" : ""}`}
+      />
     </div>
   );
 }

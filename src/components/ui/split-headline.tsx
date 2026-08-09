@@ -56,6 +56,19 @@ export function SplitHeadline({
     const chars = root.querySelectorAll<HTMLElement>("[data-char]");
     if (!chars.length) return;
 
+    /* The preloader's handoff, in seconds, or zero when it is not running.
+       `.rise` and `.draw` are offset by a CSS rule keyed off the same attribute,
+       and this is the one load-time entrance on the page that CSS cannot reach.
+       Without it the headline played its whole 1.27s arrival behind an opaque
+       overlay and the reader was handed a hero that was already finished, which
+       is the single most visible thing on the site spent on nobody. */
+    const doc = document.documentElement;
+    const handoff = doc.hasAttribute("data-preload")
+      ? (parseFloat(
+          getComputedStyle(doc).getPropertyValue("--preload-handoff")
+        ) || 0) / 1000
+      : 0;
+
     const ctx = gsap.context(() => {
       gsap.set(chars, { yPercent: 118 });
       gsap.to(chars, {
@@ -63,7 +76,7 @@ export function SplitHeadline({
         duration: 1.15,
         ease: "expo.out",
         stagger: { each: 0.016, from: "start" },
-        delay: 0.12,
+        delay: 0.12 + handoff,
       });
     }, root);
 
@@ -81,21 +94,50 @@ export function SplitHeadline({
              bottom of every line. */
           className="block overflow-hidden pb-[0.12em] [margin-bottom:-0.12em]"
         >
+          {/* Characters are grouped into words, and each word is an
+              `inline-block` that refuses to break inside itself.
+
+              This grouping is load-bearing rather than tidy. Every character is
+              its own inline-level box so it can be translated independently,
+              and inline boxes wrap wherever they run out of room, so without
+              the grouping a line wider than its container breaks *between two
+              letters*. Not hypothetical: `/data`'s headline rendered as
+              "Method before n / umber" until this was added. The wrapper
+              restores the only break opportunity a headline is allowed to have,
+              which is a space.
+
+              The accent suffix rides the last word for the same reason. Alone
+              it is a one-character box that can wrap by itself, which parks the
+              mark's backslash on an empty row under the sentence. */}
           <span className="block">
-            {[...line.text].map((ch, ci) => (
-              <span
-                key={ci}
-                data-char
-                className="inline-block will-change-transform"
-              >
-                {ch === " " ? " " : ch}
-              </span>
+            {line.text.split(" ").map((word, wi, words) => (
+              <React.Fragment key={wi}>
+                {/* A real space, so lines still break between words and so
+                    selecting the headline copies the sentence. */}
+                {wi > 0 ? " " : null}
+
+                <span className="inline-block whitespace-nowrap">
+                  {[...word].map((ch, ci) => (
+                    <span
+                      key={ci}
+                      data-char
+                      className="inline-block will-change-transform"
+                    >
+                      {ch}
+                    </span>
+                  ))}
+
+                  {line.accentSuffix && wi === words.length - 1 ? (
+                    <span
+                      data-char
+                      className="inline-block text-accent will-change-transform"
+                    >
+                      {line.accentSuffix}
+                    </span>
+                  ) : null}
+                </span>
+              </React.Fragment>
             ))}
-            {line.accentSuffix ? (
-              <span data-char className="inline-block text-accent will-change-transform">
-                {line.accentSuffix}
-              </span>
-            ) : null}
           </span>
         </span>
       ))}

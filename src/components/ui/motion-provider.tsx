@@ -88,18 +88,74 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
 
+    /**
+     * Re-measure both halves, in this order, always.
+     *
+     * This is the fix for "the page sometimes will not scroll to the footer",
+     * and the cause is worth writing down because the symptom points at the
+     * wrong component. Lenis caches the scroll limit as `scrollHeight -
+     * clientHeight` and clamps its target to it. Every wheel event is
+     * interpreted against that cached number, so if the document grows after
+     * Lenis measured it, the last stretch of the page is not slow or janky, it
+     * is unreachable: the wheel keeps firing and the target stops moving.
+     *
+     * On `/` the document does grow after init, more than once. Webfonts land
+     * and re-flow six full-height panels. Six ScrollTrigger pins are created
+     * and `pinSpacing: false` changes what the panels below them contribute to
+     * document height. The preloader holds a fixed overlay for the first two
+     * seconds. Any of those can land after Lenis has taken its measurement, and
+     * the last 100svh of the page, which is exactly the curtain the footer
+     * lives in, is what falls off the end.
+     *
+     * `lenis.resize()` first, then `ScrollTrigger.refresh()`: the triggers'
+     * start and end positions are resolved against the scroller, so refreshing
+     * before the scroller knows its own size means doing it twice.
+     */
+    const resync = () => {
+      lenis.resize();
+      ScrollTrigger.refresh();
+    };
+
     // Webfonts land after first paint and change every measurement ScrollTrigger
     // took. Without this, every trigger on the page is positioned against
     // fallback metrics.
-    let refresh: number | undefined;
+    let fontSync: number | undefined;
     if (document.fonts?.ready) {
       document.fonts.ready.then(() => {
-        refresh = window.setTimeout(() => ScrollTrigger.refresh(), 60);
+        fontSync = window.setTimeout(resync, 60);
       });
     }
 
+    /* The preloader's own release, plus a beat. It holds a fixed, full-screen
+       overlay for 2.2s and drops `data-preload` at 3.6s, and the entrance
+       animations keyed off that attribute are still settling until then. One
+       measurement taken after all of it has finished is cheap insurance against
+       every ordering the first two seconds can produce. */
+    const settleSync = window.setTimeout(resync, 3800);
+
+    /* Anything else that changes the document's height: a pin being created,
+       an image arriving, a section revealing, a phone collapsing its URL bar.
+       Observing the body catches all of them without knowing which one
+       happened. `lenis.resize()` alone here rather than the full `resync`,
+       because ScrollTrigger already installs its own resize handling and
+       running a refresh on every observed frame is how a scroll starts
+       stuttering. */
+    const observer = new ResizeObserver(() => lenis.resize());
+    observer.observe(document.body);
+
+    /* Restoring from the back/forward cache replays none of the above: the
+       document is handed back whole, with Lenis holding whatever it last
+       measured on a page that may have been resized in another tab since. */
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) resync();
+    };
+    window.addEventListener("pageshow", onPageShow);
+
     return () => {
-      if (refresh) window.clearTimeout(refresh);
+      if (fontSync) window.clearTimeout(fontSync);
+      window.clearTimeout(settleSync);
+      window.removeEventListener("pageshow", onPageShow);
+      observer.disconnect();
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(tick);
       lenis.destroy();
