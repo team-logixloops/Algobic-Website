@@ -11,6 +11,7 @@ import { HingePanel } from "@/components/ui/hinge-panel";
 import { HingeStack } from "@/components/ui/hinge-stack";
 import { JsonLd } from "@/components/ui/json-ld";
 import { ShatterGL } from "@/components/ui/shatter-gl";
+import { BUILDS } from "@/lib/builds";
 import { webPageNode } from "@/lib/json-ld";
 import { SITE } from "@/lib/site";
 
@@ -53,6 +54,8 @@ import { SITE } from "@/lib/site";
  * plain sequence of full-height sections in document order.
  */
 export default function Home() {
+  const count = BUILDS.length;
+
   return (
     <div className="flex min-h-[100svh] flex-col">
       {/* The homepage's own `WebPage` node, which used to be emitted from the
@@ -82,14 +85,17 @@ export default function Home() {
           <HingePanel
             title={
               <>
-                <span className="sr-only">Zero </span>builds published
+                <span className="sr-only">
+                  {count === 0 ? "Zero" : count}{" "}
+                </span>
+                {count === 1 ? "build" : "builds"} published
               </>
             }
             hinge={16}
             shards={3}
             ground="flip"
           >
-            <TheCount />
+            <TheCount count={count} />
           </HingePanel>
 
           <HingePanel title="The gap" hinge={13} shards={3} ground="surface">

@@ -83,7 +83,7 @@ export function HeroParallax({
   tiles,
   header,
 }: {
-  /** Fifteen fills the three rows. Fewer simply leaves a row short. */
+  /** Fifteen fills the three rows of five. Fewer simply leaves a row short. */
   tiles: readonly ParallaxTile[];
   /** The page's own h1 and answer block. Rendered outside the tilted plane. */
   header?: React.ReactNode;
@@ -113,6 +113,7 @@ export function HeroParallax({
     useTransform(scrollYProgress, [0, 1], [0, -drift]),
     SPRING
   );
+
   const rotateX = useSpring(useTransform(scrollYProgress, [0, 0.2], [15, 0]), SPRING);
   const opacity = useSpring(
     useTransform(scrollYProgress, [0, 0.2], [0.2, 1]),
@@ -120,56 +121,24 @@ export function HeroParallax({
   );
   const rotateZ = useSpring(useTransform(scrollYProgress, [0, 0.2], [20, 0]), SPRING);
 
-  /* Rests at 0, not at the original's +500.
-
-     `useTransform` clamps, so past 20% progress the plane is pinned wherever
-     this range ends, for the whole remaining 300vh. The shell's height is
-     viewport-*height* driven and the plane's is viewport-*width* driven, so
-     +500px pushed the bottom row straight out of the `overflow: hidden` box on
-     every short-and-wide laptop. Measured across a 21-step scroll sweep, best
-     visibility the third row ever reached: 1920x1080 100%, 1600x900 100%,
-     1440x900 75%, 1536x864 39%, and 1440x800, 1366x768 and 1280x720 all 0%.
-     At 1280x720 the second row only ever reached 70%.
-
-     Resting at 0 puts the plane in its own layout slot, which is the one
-     position the shell is guaranteed to contain. It also closes the 500px band
-     of empty ground the offset left between the header and the first row. */
+  /* Rests at 0, not at the original's +500. */
   const translateY = useSpring(
     useTransform(scrollYProgress, [0, 0.2], [-700, 0]),
     SPRING
   );
 
   return (
-    /* `reducedMotion="user"` covers the one thing CSS cannot reach here: the
-       `whileHover` lift, which motion drives imperatively rather than through
-       a class. */
     <MotionConfig reducedMotion="user">
-      {/* Height, perspective and the 3D context all live in `.wall__shell` so
-          the two resting-state conditions can undo them in one place. */}
       <div
         ref={ref}
-        className="wall__shell relative flex flex-col self-auto overflow-hidden py-[clamp(3rem,10vw,10rem)] antialiased"
+        className="wall__shell relative flex flex-col self-auto overflow-x-clip overflow-y-visible py-[clamp(3rem,10vw,10rem)] antialiased"
       >
-        {/* A scrim, not a lid.
-
-            At rest the plane sits 700px above its layout position, so the top
-            row lands directly behind the h1. Left alone, the tiles' fill and
-            their label strips read through the counters of the letterforms,
-            and the h1 is both the LCP element and the only thing on screen
-            doing the human work.
-
-            A solid `bg-background` fixed that and introduced a worse problem:
-            a hard horizontal edge where the band ended and the wall began,
-            which reads as a black box sitting on top of the artwork. So the
-            ground fades instead. Opaque where the headline is, gone by the
-            bottom of the block, and the wall is visible behind the text the
-            whole way down rather than clipped by it. */}
         <div className="relative z-10 bg-linear-to-b from-background from-30% via-background/88 to-transparent">
           {header}
         </div>
 
         <motion.div
-          className="wall__plane"
+          className="wall__plane pb-[clamp(6rem,14vw,16rem)]"
           style={{ rotateX, rotateZ, translateY, opacity }}
         >
           <ParallaxRow tiles={firstRow} translate={translateX} reverse />

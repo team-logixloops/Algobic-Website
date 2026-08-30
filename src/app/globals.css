@@ -543,8 +543,10 @@ a:focus-visible .slash-glyph {
    that read as load-bearing. `perspective` is what actually tilts the plane,
    and it applies to children regardless. */
 .wall__shell {
-  height: 300vh;
+  min-height: 320vh;
+  height: 320vh;
   perspective: 1000px;
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {

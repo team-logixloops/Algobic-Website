@@ -220,7 +220,7 @@ export default function BuildsPage() {
                     <span className="text-accent-ink">
                       {String(count).padStart(2, "0")}
                     </span>{" "}
-                    of {SLOTS} slots filled
+                    builds published
                   </>
                 ) : (
                   <>
@@ -233,6 +233,8 @@ export default function BuildsPage() {
           }
         />
 
+        <div className="h-[clamp(3rem,8vw,8rem)]" />
+
         {/* `PageSection` rather than a hand-rolled seam plus heading, so this
             route reads with the same spine as the nine that shipped on
             2026-08-09: heading in a sticky left rail, shards counting down to a
@@ -241,7 +243,7 @@ export default function BuildsPage() {
           <div className="max-w-[64rem]">
             {/* Zero state, real rows, same component. `showAllLink` is off:
                 this page is where that link goes. */}
-            <BuildIndex count={SLOTS} showAllLink={false} />
+            <BuildIndex count={BUILDS.length} showAllLink={false} />
           </div>
         </PageSection>
 
