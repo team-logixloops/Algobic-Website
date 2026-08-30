@@ -549,6 +549,13 @@ a:focus-visible .slash-glyph {
   overflow-x: clip;
 }
 
+@media (width < 48rem) {
+  .wall__shell {
+    min-height: 120vh;
+    height: 120vh;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wall__shell {
     height: auto;

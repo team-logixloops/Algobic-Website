@@ -233,8 +233,6 @@ export default function BuildsPage() {
           }
         />
 
-        <div className="h-[clamp(3rem,8vw,8rem)]" />
-
         {/* `PageSection` rather than a hand-rolled seam plus heading, so this
             route reads with the same spine as the nine that shipped on
             2026-08-09: heading in a sticky left rail, shards counting down to a

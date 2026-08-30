@@ -103,7 +103,8 @@ export function HeroParallax({
      one of these transforms evaluates identically at `scrollYProgress === 0`
      whatever the range says, so the hydrated markup matches regardless. */
   const narrow = useMediaQuery("(width < 48rem)");
-  const drift = narrow ? 360 : 1000;
+  const drift = narrow ? 260 : 1000;
+  const initialTranslateY = narrow ? 40 : -700;
 
   const translateX = useSpring(
     useTransform(scrollYProgress, [0, 1], [0, drift]),
@@ -123,7 +124,7 @@ export function HeroParallax({
 
   /* Rests at 0, not at the original's +500. */
   const translateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [-700, 0]),
+    useTransform(scrollYProgress, [0, 0.2], [initialTranslateY, 0]),
     SPRING
   );
 
@@ -131,14 +132,14 @@ export function HeroParallax({
     <MotionConfig reducedMotion="user">
       <div
         ref={ref}
-        className="wall__shell relative flex flex-col self-auto overflow-x-clip overflow-y-visible py-[clamp(3rem,10vw,10rem)] antialiased"
+        className="wall__shell relative flex flex-col self-auto overflow-x-clip overflow-y-visible py-[clamp(1.5rem,5vw,10rem)] antialiased"
       >
-        <div className="relative z-10 bg-linear-to-b from-background from-30% via-background/88 to-transparent">
+        <div className="relative z-10 bg-linear-to-b from-background from-45% via-background/95 to-transparent pb-6 md:pb-0">
           {header}
         </div>
 
         <motion.div
-          className="wall__plane pb-[clamp(6rem,14vw,16rem)]"
+          className="wall__plane mt-4 pb-0 md:mt-0 md:pb-[clamp(6rem,14vw,16rem)]"
           style={{ rotateX, rotateZ, translateY, opacity }}
         >
           <ParallaxRow tiles={firstRow} translate={translateX} reverse />
@@ -170,9 +171,9 @@ function ParallaxRow({
 }) {
   return (
     <div
-      className={`wall__row flex gap-[clamp(1rem,4vw,5rem)] ${
+      className={`wall__row flex gap-[clamp(0.75rem,2.5vw,5rem)] ${
         reverse ? "flex-row-reverse" : "flex-row"
-      } ${last ? "" : "mb-[clamp(1rem,4vw,5rem)]"}`}
+      } ${last ? "" : "mb-[clamp(0.75rem,2.5vw,5rem)]"}`}
     >
       {tiles.map((tile) => (
         <TileCard key={tile.title} tile={tile} translate={translate} />
@@ -207,7 +208,7 @@ export function TileCard({
       /* Unfilled slots are pure atmosphere. Announcing fifteen of them would
          bury the one sentence on this page that carries the real count. */
       aria-hidden={tile.empty ? "true" : undefined}
-      className="wall__tile group/tile relative h-[clamp(11rem,46vw,24rem)] w-[clamp(17rem,72vw,30rem)] shrink-0 border border-line"
+      className="wall__tile group/tile relative h-[clamp(9rem,26vw,24rem)] w-[clamp(13.5rem,38vw,30rem)] shrink-0 border border-line"
     >
       {tile.link ? (
         <Link href={tile.link} className="block h-full w-full">
@@ -219,16 +220,18 @@ export function TileCard({
 
       {/* The label sits over the art rather than inside the link so an unfilled
           slot can carry one without becoming a control. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-linear-to-t from-background/90 to-transparent px-4 pt-10 pb-4">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-linear-to-t from-background/95 via-background/80 to-transparent px-3 pt-6 pb-2.5 sm:gap-1 sm:px-4 sm:pt-10 sm:pb-4">
         <span
-          className={`font-display text-[clamp(0.8rem,1.4vw,1rem)] leading-tight font-bold ${
+          className={`font-display text-[clamp(0.75rem,2.5vw,1rem)] leading-tight font-bold line-clamp-2 ${
             tile.empty ? "text-muted" : "text-foreground"
           }`}
         >
           {tile.title}
         </span>
         {tile.meta ? (
-          <span className="font-mono text-micro text-muted">{tile.meta}</span>
+          <span className="font-mono text-[clamp(0.6rem,1.8vw,0.75rem)] text-muted line-clamp-1">
+            {tile.meta}
+          </span>
         ) : null}
       </div>
 
