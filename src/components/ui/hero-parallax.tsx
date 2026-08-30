@@ -103,8 +103,7 @@ export function HeroParallax({
      one of these transforms evaluates identically at `scrollYProgress === 0`
      whatever the range says, so the hydrated markup matches regardless. */
   const narrow = useMediaQuery("(width < 48rem)");
-  const drift = narrow ? 260 : 1000;
-  const initialTranslateY = narrow ? 40 : -700;
+  const drift = narrow ? 240 : 1000;
 
   const translateX = useSpring(
     useTransform(scrollYProgress, [0, 1], [0, drift]),
@@ -115,16 +114,22 @@ export function HeroParallax({
     SPRING
   );
 
-  const rotateX = useSpring(useTransform(scrollYProgress, [0, 0.2], [15, 0]), SPRING);
-  const opacity = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [0.2, 1]),
+  const rotateX = useSpring(
+    useTransform(scrollYProgress, [0, 0.2], [narrow ? 0 : 15, 0]),
     SPRING
   );
-  const rotateZ = useSpring(useTransform(scrollYProgress, [0, 0.2], [20, 0]), SPRING);
+  const opacity = useSpring(
+    useTransform(scrollYProgress, [0, 0.2], [narrow ? 1 : 0.2, 1]),
+    SPRING
+  );
+  const rotateZ = useSpring(
+    useTransform(scrollYProgress, [0, 0.2], [narrow ? 0 : 20, 0]),
+    SPRING
+  );
 
   /* Rests at 0, not at the original's +500. */
   const translateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [initialTranslateY, 0]),
+    useTransform(scrollYProgress, [0, 0.2], [narrow ? 0 : -700, 0]),
     SPRING
   );
 
@@ -132,14 +137,14 @@ export function HeroParallax({
     <MotionConfig reducedMotion="user">
       <div
         ref={ref}
-        className="wall__shell relative flex flex-col self-auto overflow-x-clip overflow-y-visible py-[clamp(1.5rem,5vw,10rem)] antialiased"
+        className="wall__shell relative flex flex-col self-auto overflow-x-clip overflow-y-visible py-[clamp(1.5rem,4vw,10rem)] antialiased"
       >
-        <div className="relative z-10 bg-linear-to-b from-background from-45% via-background/95 to-transparent pb-6 md:pb-0">
+        <div className="relative z-10 bg-linear-to-b from-background from-45% via-background/95 to-transparent pb-4 md:pb-0">
           {header}
         </div>
 
         <motion.div
-          className="wall__plane mt-4 pb-0 md:mt-0 md:pb-[clamp(6rem,14vw,16rem)]"
+          className="wall__plane mt-4 mb-10 md:mt-0 md:mb-0 md:pb-[clamp(6rem,14vw,16rem)]"
           style={{ rotateX, rotateZ, translateY, opacity }}
         >
           <ParallaxRow tiles={firstRow} translate={translateX} reverse />

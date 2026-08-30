@@ -551,8 +551,9 @@ a:focus-visible .slash-glyph {
 
 @media (width < 48rem) {
   .wall__shell {
-    min-height: 120vh;
-    height: 120vh;
+    min-height: auto;
+    height: auto;
+    perspective: none;
   }
 }
 
