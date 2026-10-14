@@ -16,17 +16,17 @@ import { pageMetadata } from "@/lib/page-meta";
 import { SITE } from "@/lib/site";
 
 const DESCRIPTION =
-  "The final price sheet: entry points, school cohorts, 8-week builder tracks, and institutional licences. Every rupee, gate, and AI access rule stated in the open.";
+  "The price sheet: entry points, school cohorts, 8-week builder tracks, and institutional licences. Every rupee, gate, and AI access rule stated in the open.";
 
 export const metadata: Metadata = pageMetadata({
   path: "/join",
-  title: "The final price sheet: every term in plain rupee",
+  title: "The price sheet: every term in plain rupee",
   description: DESCRIPTION,
   index: false,
 });
 
 /* ---------------------------------------------------------------------------
-   TABLE 1: ENTRY — UNCHANGED, AND HERE IS WHY
+   TABLE 1: ENTRY
 --------------------------------------------------------------------------- */
 const ENTRY_COLUMNS: readonly LedgerColumn[] = [
   { head: "Intake / Format", rowHeader: true, className: "w-[24%]" },
@@ -56,8 +56,7 @@ const ENTRY_ROWS = [
       25 min, 1:1
     </span>,
     <p key="note-disc" className="font-sans text-[0.875rem] leading-relaxed text-muted">
-      Cannot take the ₹500. The list price exists so ₹98 reads as a concession
-      rather than as your valuation.
+      A one to one intake before you choose a tier.
     </p>,
   ],
   [
@@ -79,7 +78,7 @@ const ENTRY_ROWS = [
       One 60 min session
     </span>,
     <p key="note-trial" className="font-sans text-[0.875rem] leading-relaxed text-muted">
-      Cannot take the ₹500. Fully credited against any plan.
+      Fully credited against any plan.
     </p>,
   ],
 ] as const;
@@ -229,8 +228,8 @@ const SCHOOL_ROWS = [
         Four sessions, dedicated coach, recording or a second adult on every session.
       </p>
       <p className="font-mono text-micro text-muted">
-        Maximum four active slots, existing batch families only,{" "}
-        <strong className="text-foreground">never advertised</strong>.
+        Maximum four active slots,{" "}
+        <strong className="text-foreground">open only to families already in a batch</strong>.
       </p>
     </div>,
   ],
@@ -279,7 +278,7 @@ const ADULT_ROWS = [
         each. Four demo days, cohort capped at 15.
       </p>
       <p className="font-mono text-micro text-accent-ink">
-        <strong className="text-foreground">One month of Claude Pro</strong> unlocks on day ten. Claude Code not mentioned at this tier.
+        <strong className="text-foreground">One month of Claude Pro</strong> unlocks on day ten.
       </p>
     </div>,
   ],
@@ -431,10 +430,10 @@ const INSTITUTION_ROWS = [
       <p className="text-foreground">
         Must personally ship three builds to certify. Assessed on a recorded
         coaching session. Fifteen playbooks with prompts, break points and rupee
-        costs. Licence to run Ship Sprints, revocable. Coach keeps 65 percent.
+        costs. Licence to run Ship Sprints, revocable.
       </p>
       <p className="font-mono text-micro font-bold text-accent-ink">
-        ₹20,415 per mentor hour, best in the book.
+        Coach keeps 65 percent of every Ship Sprint they run.
       </p>
     </div>,
   ],
@@ -494,9 +493,9 @@ const INSTITUTION_ROWS = [
     </span>,
     <div key="i-fdp-inc" className="font-sans text-[0.875rem] leading-relaxed space-y-1">
       <p className="text-foreground">
-        Sits inside standard FDP budget norms, so you compete for allocated
-        money rather than new money. Faculty ship three builds each or they do
-        not complete.
+        Priced inside standard FDP budget norms, so it can be paid from an
+        existing FDP budget. Faculty ship three builds each or they do not
+        complete.
       </p>
       <p className="font-mono text-micro text-muted">
         One campus Ship Sprint included.
@@ -601,7 +600,7 @@ export default function JoinPage() {
   const structuredData = [
     webPageNode({
       path: "/join",
-      name: `Final price sheet | ${SITE.name}`,
+      name: `Price sheet | ${SITE.name}`,
       description: DESCRIPTION,
       type: "ContactPage",
     }),
@@ -616,7 +615,7 @@ export default function JoinPage() {
 
       <main className="flex-1">
         <PageMasthead
-          eyebrow="Final price sheet"
+          eyebrow="Price sheet"
           lines={[
             { text: "Every number," },
             { text: "in plain rupee", accentSuffix: "\\" },
@@ -642,14 +641,13 @@ export default function JoinPage() {
           lede={
             <>
               Two low-friction entry points before committing to a multi-week
-              cohort. The list price exists so the founding fee reads as a
-              concession rather than as your valuation. Fully credited against any plan.
+              cohort. The trial build is fully credited against any plan.
             </>
           }
         >
           <div className="max-w-[76rem]">
             <Ledger
-              caption="Entry — unchanged, and here is why"
+              caption="Entry · discovery call and trial build"
               columns={ENTRY_COLUMNS}
               rows={ENTRY_ROWS}
               minWidth="min-w-[50rem]"
