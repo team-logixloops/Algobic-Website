@@ -26,6 +26,8 @@ export type LedgerColumn = {
   head: string;
   /** Marks the column that names each row. Exactly one, and it comes first. */
   rowHeader?: true;
+  /** Optional class name for styling column widths or alignment. */
+  className?: string;
 };
 
 export function Ledger({
@@ -33,12 +35,16 @@ export function Ledger({
   columns,
   rows,
   className = "",
+  minWidth = "min-w-[44rem]",
+  highlightRows,
 }: {
   /** Names the table. Visible: a caption nobody can see is a caption for robots. */
   caption: string;
   columns: readonly LedgerColumn[];
   rows: readonly (readonly React.ReactNode[])[];
   className?: string;
+  minWidth?: string;
+  highlightRows?: readonly number[];
 }) {
   return (
     <Rise y={30} className={className}>
@@ -48,7 +54,7 @@ export function Ledger({
         tabIndex={0}
         className="overflow-x-auto"
       >
-        <table className="w-full min-w-[44rem] border-collapse text-left">
+        <table className={`w-full ${minWidth} border-collapse text-left`}>
           <caption className="eyebrow text-eyebrow mb-[clamp(0.75rem,2vw,1.25rem)] text-left">
             {caption}
           </caption>
@@ -59,7 +65,9 @@ export function Ledger({
                 <th
                   key={column.head}
                   scope="col"
-                  className="border-y border-line px-[clamp(0.5rem,1.2vw,1rem)] py-[clamp(0.625rem,1.4vw,0.875rem)] font-mono text-micro font-normal text-accent-ink uppercase first:pl-0 last:pr-0"
+                  className={`border-y border-line px-[clamp(0.5rem,1.2vw,1rem)] py-[clamp(0.625rem,1.4vw,0.875rem)] font-mono text-micro font-normal text-accent-ink uppercase first:pl-0 last:pr-0 ${
+                    column.className ?? ""
+                  }`}
                 >
                   {column.head}
                 </th>
@@ -69,20 +77,31 @@ export function Ledger({
 
           <tbody>
             {rows.map((row, ri) => (
-              <tr key={ri}>
+              <tr
+                key={ri}
+                className={
+                  highlightRows?.includes(ri)
+                    ? "bg-accent/4 transition-colors"
+                    : "transition-colors"
+                }
+              >
                 {row.map((cell, ci) =>
                   columns[ci]?.rowHeader ? (
                     <th
                       key={ci}
                       scope="row"
-                      className="border-b border-line px-[clamp(0.5rem,1.2vw,1rem)] py-[clamp(0.75rem,1.8vw,1.125rem)] align-top font-display text-[clamp(0.875rem,1.3vw,1rem)] font-bold text-foreground first:pl-0 last:pr-0"
+                      className={`border-b border-line px-[clamp(0.5rem,1.2vw,1rem)] py-[clamp(0.75rem,1.8vw,1.125rem)] align-top font-display text-[clamp(0.875rem,1.3vw,1rem)] font-bold text-foreground first:pl-0 last:pr-0 ${
+                        columns[ci]?.className ?? ""
+                      }`}
                     >
                       {cell}
                     </th>
                   ) : (
                     <td
                       key={ci}
-                      className="border-b border-line px-[clamp(0.5rem,1.2vw,1rem)] py-[clamp(0.75rem,1.8vw,1.125rem)] align-top font-mono text-data tabular-nums text-muted first:pl-0 last:pr-0"
+                      className={`border-b border-line px-[clamp(0.5rem,1.2vw,1rem)] py-[clamp(0.75rem,1.8vw,1.125rem)] align-top font-mono text-data tabular-nums text-muted first:pl-0 last:pr-0 ${
+                        columns[ci]?.className ?? ""
+                      }`}
                     >
                       {cell}
                     </td>
