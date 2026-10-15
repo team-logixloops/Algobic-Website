@@ -16,9 +16,8 @@ import { SITE } from "@/lib/site";
  *
  * The tier names were already a dive: Cold Start, Strangers, Deep End. So the
  * page goes down with them. Each tier sits on its own full-bleed ground and
- * the grounds step away from the page in turn, paper to surface to the
- * inverted ground, so by the deep end the page has turned over: dark in the
- * light theme, light in the dark one. Between tiers that
+ * the grounds darken in step, in both themes, so the deep end is always the
+ * darkest ground on the page. Between tiers that
  * have one, a gate draws across the width as you scroll over it: the thing you
  * have to have shipped before you can enter what is below.
  *
@@ -33,10 +32,13 @@ import { SITE } from "@/lib/site";
  * and `.draw-scroll-y` the rest of the site already uses. Nothing fades in.
  */
 
+/* Grounds live in `globals.css` under "The descent's grounds": the dark theme
+   needs its own ramp, and that is two selectors, not a Tailwind variant per
+   tier. */
 const GROUND: Record<Plan["depth"], string> = {
-  1: "bg-background text-foreground",
-  2: "bg-surface text-foreground",
-  3: "ground-flip bg-background text-foreground",
+  1: "depth-1 text-foreground",
+  2: "depth-2 text-foreground",
+  3: "depth-3 text-foreground",
 };
 
 const FRAME = "mx-auto w-full max-w-[110rem] px-[max(1rem,4vw)]";

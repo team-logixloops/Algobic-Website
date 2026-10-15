@@ -61,8 +61,8 @@ export type Plan = {
   seats?: string;
   recommended?: true;
   /**
-   * Ground the tier sits on. 1 is paper, 2 is the surface step, 3 is the
-   * inverted ground: by the deep end the page has turned over.
+   * Ground the tier sits on, from 1 to 3, each darker than the last in both
+   * themes: the deep end is always the darkest ground on the page.
    */
   depth: 1 | 2 | 3;
   /** Sits at the same depth as the plan before it rather than one deeper. */
@@ -95,7 +95,7 @@ export const AUDIENCES: readonly Audience[] = [
     id: "institutions",
     label: "Institutions",
     forWhom: "Trainers, schools and colleges",
-    lede: "Certification for coaches, programmes for teachers and faculty, and a yearly licence for a whole campus. Coaches and faculty ship their own builds before they certify or complete.",
+    lede: "Certification for coaches, and programmes for school teachers and college faculty. Coaches and faculty ship their own builds before they certify or complete.",
   },
 ] as const;
 
@@ -320,24 +320,6 @@ export const PLANS: readonly Plan[] = [
     ships: "Faculty ship three builds each, or they do not complete.",
     includes: ["One campus Ship Sprint"],
     assurance: "Priced inside standard FDP budget norms, so it can be paid from an existing FDP budget.",
-    depth: 1,
-  },
-  {
-    id: "institutions-campus-licence",
-    name: "Campus Partner Licence",
-    audience: "institutions",
-    level: "Institutional agreement",
-    listPrice: 298998,
-    price: 298498,
-    billing: { kind: "yearly" },
-    chunk: { amount: 1492, per: "a student" },
-    length: "One year, up to 200 students",
-    ships: "Up to 200 students a year, building on your campus.",
-    includes: [
-      "Coach training",
-      "A co-branded student build page",
-      "Two Ship Sprints a year, on site",
-    ],
     depth: 1,
   },
 ] as const;

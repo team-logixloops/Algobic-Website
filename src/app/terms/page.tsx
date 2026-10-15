@@ -79,9 +79,10 @@ const CLAUSES: readonly ClauseItem[] = [
           theirs to decide.
         </p>
         <p>
-          This is exactly why no page here prints a price. A stale figure is
-          checkable and wrong, and a figure we do not print cannot mislead you
-          into a bill you did not expect.
+          So no page here prints their prices. A stale figure is checkable and
+          wrong, and a figure we do not print cannot mislead you into a bill
+          you did not expect. The only prices on this site are our own, on the
+          pricing page.
         </p>
       </>
     ),
@@ -94,7 +95,7 @@ const CLAUSES: readonly ClauseItem[] = [
         Follow a guide, build the thing, ship it, sell it, put it on your resume,
         rewrite it beyond recognition. We take no ownership, no licence, no
         revenue share and no credit requirement in anything you make. There is
-        nothing to sign, because there is nothing being asked for.
+        nothing to sign, because we ask for no rights in it.
       </p>
     ),
   },
@@ -141,6 +142,31 @@ const CLAUSES: readonly ClauseItem[] = [
         <p>
           A time or a cost printed on a build page describes that build. It is
           not a prediction about yours, and it is not a guarantee of any outcome.
+        </p>
+      </>
+    ),
+  },
+  {
+    heading: "Paying for a plan",
+    answer: "The price on the pricing page is the price. Nothing is charged on this site.",
+    body: (
+      <>
+        <p>
+          Every plan, its price in rupees and its terms are on the{" "}
+          <Link
+            href="/pricing"
+            className="text-accent-ink underline decoration-line underline-offset-4 hover:decoration-accent-ink"
+          >
+            pricing page
+          </Link>
+          . A seat is claimed by message on Instagram, and no payment is taken
+          through this website.
+        </p>
+        <p>
+          School plans bill monthly with a two-month maximum term and can be
+          cancelled after the first month. The Strangers deposit is returned
+          once five strangers or one paying user are proven. The Trial Build is
+          credited in full against any plan. No plan includes a job guarantee.
         </p>
       </>
     ),
@@ -222,7 +248,7 @@ export default function TermsPage() {
           shards={2}
           lede={
             <>
-              Eight positions in plain language. The mono line under each heading
+              Nine positions in plain language. The mono line under each heading
               is the position; the paragraph is the reasoning.
             </>
           }
@@ -236,9 +262,9 @@ export default function TermsPage() {
           <div className="max-w-[62ch] space-y-4 text-[clamp(0.9375rem,1.35vw,1.0625rem)] leading-relaxed text-muted">
             <p>
               This page is written by the people who built the site rather than
-              by a lawyer. It is an honest statement of position and it will be
-              reviewed before anything is sold or before any real data is taken
-              from anyone.
+              by a lawyer, and it has not been reviewed by one yet. It is an
+              honest statement of position. Until that review, the terms of any
+              plan you buy are the ones stated on the pricing page.
             </p>
             <p>
               {SITE.legalName}

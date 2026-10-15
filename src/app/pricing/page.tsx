@@ -41,7 +41,7 @@ const DESCRIPTION = `${SITE.name} pricing in rupees: college build cohorts from 
   COLLEGE_FROM.price
 )}, school batches from ${rupees(
   SCHOOL_FROM.price
-)} a month, and programmes for coaches, teachers and campuses.`;
+)} a month, and programmes for coaches, teachers and faculty.`;
 
 export const metadata: Metadata = pageMetadata({
   path: PATH,
@@ -246,7 +246,7 @@ export default function PricingPage() {
               Every {SITE.name} plan, priced in rupees on one page. College
               cohorts run four to eight weeks from {rupees(COLLEGE_FROM.price)}.
               School batches start at {rupees(SCHOOL_FROM.price)} a month.
-              Institutions license coaches, teachers, faculty and campuses.
+              Institutions can certify coaches and train teachers and faculty.
               Strangers and Deep End have gates you clear by shipping, so no one
               buys their way deeper, and no plan promises a job.
             </>

@@ -46,7 +46,8 @@
 }
 
 .dark,
-.ground-flip {
+.ground-flip,
+.depth-3 {
   --background: #08070c;
   --foreground: #f2eef7;
   /* Was #7a7188, measured at 4.35:1 on this ground: under AA for body text,
@@ -303,6 +304,34 @@ body {
   .price-cut::after {
     display: none;
   }
+}
+
+/* The descent's grounds, on `/pricing`. Each tier sits a step darker than the
+   one above it, in both themes, so the deep end is always the darkest ground.
+
+   Light: paper, then surface, then the dark palette (`.depth-3` sits in the
+   dark palette's selector list at the top of this file, so it never flips back
+   the way `.ground-flip` does under `.dark`).
+
+   Dark: there is nothing darker than the page, so the steps run the other way
+   from the top. Depth 1 is lifted 2.5% toward the foreground, depth 2 is the
+   surface, depth 3 is the page itself. 2.5% is near the ceiling, not a taste
+   call: dark `--muted` measures 4.55:1 on the lifted ground (computed
+   2026-10-15) and hits the 4.5:1 AA floor at 3%. */
+.depth-1 {
+  background: var(--background);
+}
+
+.depth-2 {
+  background: var(--surface);
+}
+
+.depth-3 {
+  background: var(--background);
+}
+
+.dark .depth-1 {
+  background: color-mix(in srgb, var(--surface), var(--foreground) 2.5%);
 }
 
 /* The gate's label, cut on the slash at both ends like a ticket. */
