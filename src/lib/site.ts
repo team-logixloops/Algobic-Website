@@ -42,8 +42,8 @@ export const SITE = {
     "Ideas don't matter. Certificates don't matter.",
     "What matters is what you've shipped.",
   ],
-  instagram: "https://www.instagram.com/algobic.in?igsh=cWlsZXNtZDJmOW1v",
-  instagramHandle: "algobic.in",
+  instagram: "https://www.instagram.com/algobic_/",
+  instagramHandle: "algobic_",
   locale: "en_IN",
   /**
    * BCP 47 tag for `<html lang>` and schema `inLanguage`, which both want
