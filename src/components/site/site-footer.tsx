@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BrandMask } from "@/components/ui/brand-mask";
 import { Seam } from "@/components/ui/seam";
 import { FOOTER_NAV } from "@/lib/nav";
-import { formatUpdated, SITE } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
 /**
  * The site's floor.
@@ -133,20 +133,21 @@ function FooterNav() {
 }
 
 /**
- * The two facts a published page owes a reader, carried across verbatim from the
- * colophon this replaces.
+ * The name, signed the way the mark signs it: with the backslash.
  *
- * The date is one of them. `website.md`: never publish an undated page.
+ * It used to carry the parent company and an "Updated" date as well. Both were
+ * removed on 2026-10-15 at the founder's request. The date still reaches
+ * crawlers through `dateModified` and the sitemap's `lastmod`, which both read
+ * `SITE.updated`; only the visible stamp is gone.
  */
 function Colophon() {
   return (
     <div className="mt-auto flex flex-col gap-2 border-t border-line pt-[clamp(1rem,2.5vw,1.5rem)] pb-[clamp(1.25rem,3vw,2rem)] font-mono text-micro text-muted sm:flex-row sm:items-center sm:justify-between">
       <p>
-        {SITE.legalName}, a {SITE.parent} company
-      </p>
-      <p>
-        Updated{" "}
-        <time dateTime={SITE.updated}>{formatUpdated(SITE.updated)}</time>
+        {SITE.legalName}
+        <span aria-hidden="true" className="slash-glyph">
+          \
+        </span>
       </p>
     </div>
   );

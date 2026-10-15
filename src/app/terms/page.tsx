@@ -241,7 +241,11 @@ export default function TermsPage() {
               from anyone.
             </p>
             <p>
-              {SITE.legalName}, a {SITE.parent} company, India. Governed by the
+              {SITE.legalName}
+              <span aria-hidden="true" className="slash-glyph">
+                \
+              </span>
+              , a {SITE.parent} company, India. Governed by the
               laws of India.
             </p>
           </div>
