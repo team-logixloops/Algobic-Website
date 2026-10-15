@@ -36,7 +36,7 @@ export const PRIMARY_NAV: readonly NavItem[] = [
   { href: "/start", label: "Start", live: true },
   { href: "/tools", label: "Tools", live: true },
   { href: "/answers", label: "Answers", live: true },
-  { href: "/join", label: "Join", live: true },
+  { href: "/pricing", label: "Pricing", live: true },
 ] as const;
 
 /**
@@ -65,7 +65,7 @@ export const FOOTER_NAV: readonly { heading: string; items: readonly NavItem[] }
       items: [
         { href: "/about", label: "About", live: true },
         { href: "/manifesto", label: "Manifesto", live: true },
-        { href: "/join", label: "Join", live: true },
+        { href: "/pricing", label: "Pricing", live: true },
       ],
     },
     {

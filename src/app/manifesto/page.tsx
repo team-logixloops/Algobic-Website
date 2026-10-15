@@ -239,8 +239,8 @@ export default function ManifestoPage() {
           line={<>Six lines are cheap. The builds are the test.</>}
           body={
             <>
-              Nothing on this page is selling you anything, and nothing on this
-              site is for sale today. Whether any of the six held is decided by
+              Nothing on this page is selling you anything; the prices live on
+              one page of their own. Whether any of the six held is decided by
               work with a live URL on it, and that gets announced on Instagram
               first.
             </>

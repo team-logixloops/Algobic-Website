@@ -278,13 +278,17 @@ export default function PrivacyPage() {
               reviewed before any real data is taken from anyone.
             </p>
             <p>
-              {SITE.legalName}, a {SITE.parent} company, India. Reachable through
+              {SITE.legalName}
+              <span aria-hidden="true" className="slash-glyph">
+                \
+              </span>
+              , a {SITE.parent} company, India. Reachable through
               the{" "}
               <Link
-                href="/join"
+                href="/pricing#claim"
                 className="group inline-flex items-baseline gap-1.5 text-accent-ink underline decoration-line underline-offset-4 hover:decoration-accent-ink"
               >
-                join page
+                pricing page
                 <span aria-hidden="true" className="slash-glyph">
                   \
                 </span>
@@ -305,9 +309,9 @@ export default function PrivacyPage() {
                 "What the build guides promise, what they do not, and who owns what you build.",
             },
             {
-              href: "/join",
-              label: "Join",
-              detail: "The one channel, and exactly what to put in a message.",
+              href: "/pricing",
+              label: "Pricing",
+              detail: "Every plan in rupees, and exactly what to put in the message that claims a seat.",
             },
             {
               href: "/about",

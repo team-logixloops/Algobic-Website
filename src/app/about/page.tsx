@@ -204,10 +204,10 @@ export default function AboutPage() {
                 "The practical version of this page. Five builds, ₹0 each, one evening.",
             },
             {
-              href: "/join",
-              label: "Join",
+              href: "/pricing",
+              label: "Pricing",
               detail:
-                "No form, no fee. One message with one specific thing in it.",
+                "Every plan in rupees, from a first call to an eight-week cohort.",
             },
           ]}
         />
@@ -215,8 +215,8 @@ export default function AboutPage() {
           line={<>You can watch this get built.</>}
           body={
             <>
-              Nothing here is a course, and nothing on the site is for sale
-              today. The work gets posted as it happens, including the parts
+              Every plan and its price is on the pricing page, in rupees. The
+              work gets posted as it happens, including the parts
               that do not work, and Instagram is where it happens first. If you
               are writing about
               something you want to exist, name the specific thing: that is the

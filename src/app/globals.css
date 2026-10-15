@@ -261,6 +261,55 @@ body {
   transform: skewX(calc(-1 * var(--slash-angle))) scaleX(1);
 }
 
+/* A selected tab keeps the rule drawn. `/pricing`'s plan switch. */
+[aria-selected="true"] .nav-rule {
+  transform: skewX(calc(-1 * var(--slash-angle))) scaleX(1);
+}
+
+/* The cut. A full price struck along the mark's own diagonal, top left to
+   bottom right, instead of a flat line-through: the backslash in `ALGOBIC\`
+   is the one angle on the site, and a struck price is the one place it gets
+   to cut something.
+
+   A gradient across the box rather than a rotated bar, so the line meets both
+   corners whatever the width of the number. `<s>` stays the element, so the
+   strike is still semantic; forced-colours mode drops the gradient, which it
+   would not paint anyway, and gets the native line-through back. */
+.price-cut {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.price-cut::after {
+  content: "";
+  position: absolute;
+  inset: 0.12em -0.15em;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    var(--accent-ink) calc(50% - 1px),
+    var(--accent-ink) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+}
+
+@media (forced-colors: active) {
+  .price-cut {
+    text-decoration: line-through;
+  }
+
+  .price-cut::after {
+    display: none;
+  }
+}
+
+/* The gate's label, cut on the slash at both ends like a ticket. */
+.gate-tag {
+  clip-path: polygon(0.45em 0, 100% 0, calc(100% - 0.45em) 100%, 0 100%);
+}
+
 /* The mark's own glyph, quoted after an action. Decorative: the link text
    carries the meaning.
 

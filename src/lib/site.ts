@@ -44,6 +44,12 @@ export const SITE = {
   ],
   instagram: "https://www.instagram.com/algobic_/",
   instagramHandle: "algobic_",
+  /**
+   * Opens a DM straight to the account rather than the profile grid. Every
+   * "Claim a seat" on `/pricing` uses it: the claim is a message, so the link
+   * should land in the message box, one tap from sending.
+   */
+  instagramDm: "https://ig.me/m/algobic_",
   locale: "en_IN",
   /**
    * BCP 47 tag for `<html lang>` and schema `inLanguage`, which both want
@@ -60,8 +66,11 @@ export const SITE = {
    * reading. Mechanical bumping to fake freshness is what makes the signal
    * worthless, and it is worth the reminder that this is the one date the whole
    * site's `lastmod` and `dateModified` derive from.
+   *
+   * Bumped 2026-10-15: `/pricing` shipped, and the pages that said nothing
+   * was for sale were corrected.
    */
-  updated: "2026-08-09",
+  updated: "2026-10-15",
   /**
    * The domain registered with the analytics provider.
    *

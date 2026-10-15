@@ -15,6 +15,7 @@ const ROUTES = [
   "/manifesto",
   "/privacy",
   "/terms",
+  "/pricing",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

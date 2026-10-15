@@ -36,8 +36,8 @@ const WEBSITE = `${SITE.url}/#website`;
  * The page itself.
  *
  * `type` widens to the more specific schema.org subtypes where one applies:
- * `CollectionPage` for an index, `AboutPage` for `/about`, `ContactPage` for
- * `/join`. A subtype is only used where it is literally true. A generic page
+ * `CollectionPage` for an index, `AboutPage` for `/about`. A subtype is only
+ * used where it is literally true. A generic page
  * marked up as a `FAQPage` because FAQ markup sounds valuable is the structured
  * data version of a placeholder card.
  */
@@ -174,6 +174,75 @@ export function faqNode(
       "@type": "Question",
       name: item.question,
       acceptedAnswer: { "@type": "Answer", text: item.answer },
+    })),
+  };
+}
+
+/**
+ * Everything for sale, with both prices.
+ *
+ * Each offer carries the price paid and the full price as a `ListPrice`
+ * specification, the shape Google documents for a struck-through price, so an
+ * engine quoting a plan can tell which number is which instead of picking one
+ * of two figures that sit side by side on the page. The values come from the
+ * same `PLANS` table the page renders, so markup and page cannot disagree.
+ */
+export function offerCatalogNode({
+  path,
+  name,
+  offers,
+}: {
+  path: string;
+  name: string;
+  offers: readonly {
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    price: number;
+    listPrice: number;
+    /** `MON` for monthly, `ANN` for yearly. Absent for a one-off payment. */
+    unitCode?: "MON" | "ANN";
+  }[];
+}): Node {
+  return {
+    "@context": "https://schema.org",
+    "@type": "OfferCatalog",
+    "@id": `${SITE.url}${path}#offers`,
+    name,
+    numberOfItems: offers.length,
+    itemListElement: offers.map((offer) => ({
+      "@type": "Offer",
+      "@id": `${SITE.url}${path}#${offer.id}`,
+      url: `${SITE.url}${path}#${offer.id}`,
+      name: offer.name,
+      category: offer.category,
+      price: offer.price,
+      priceCurrency: "INR",
+      priceSpecification: [
+        {
+          "@type": "UnitPriceSpecification",
+          price: offer.price,
+          priceCurrency: "INR",
+          ...(offer.unitCode
+            ? { referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: offer.unitCode } }
+            : {}),
+        },
+        {
+          "@type": "UnitPriceSpecification",
+          priceType: "https://schema.org/ListPrice",
+          price: offer.listPrice,
+          priceCurrency: "INR",
+        },
+      ],
+      seller: { "@id": ORG },
+      itemOffered: {
+        "@type": "Service",
+        name: offer.name,
+        description: offer.description,
+        provider: { "@id": ORG },
+        areaServed: { "@type": "Country", name: "India" },
+      },
     })),
   };
 }

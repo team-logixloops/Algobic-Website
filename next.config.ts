@@ -61,6 +61,14 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  /**
+   * `/join` carried the price sheet before `/pricing` existed. Permanent, so
+   * links already shared on Instagram keep working and whatever the old URL
+   * earned passes to the new one rather than splitting across two.
+   */
+  async redirects() {
+    return [{ source: "/join", destination: "/pricing", permanent: true }];
+  },
 };
 
 export default nextConfig;

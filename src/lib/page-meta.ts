@@ -36,7 +36,7 @@ export function pageMetadata({
   /** Under 160 characters, and it must describe the page that loads. */
   description: string;
   /**
-   * `false` for `/join`, `/privacy` and `/terms`.
+   * `false` for `/privacy` and `/terms`.
    *
    * `follow` stays true in every case: the pages carry real internal links and
    * there is no reason to strand the crawler once it is there. And nothing
