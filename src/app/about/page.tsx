@@ -14,6 +14,7 @@ import { WHY_NOW } from "@/lib/evidence";
 import { articleNode, breadcrumbNode, webPageNode } from "@/lib/json-ld";
 import { pageMetadata } from "@/lib/page-meta";
 import { SITE } from "@/lib/site";
+import { BrandName } from "@/components/ui/brand-name";
 
 /**
  * `/about`: what this is, why now, and what it refuses to be.
@@ -81,7 +82,7 @@ export default function AboutPage() {
             <>
               You saw an app on your feed, felt the itch, and did not build it.
               Not because it was hard. Because nobody showed you the door.
-              ALGOBIC is that door: no degree, no coding background, no course
+              <BrandName /> is that door: no degree, no coding background, no course
               to buy. Every build published end to end with a live URL.
             </>
           }

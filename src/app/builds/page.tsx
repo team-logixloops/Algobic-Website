@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE.name,
-    title: `Every build, start to finish | ${SITE.name}`,
+    title: `Every build, start to finish | ${SITE.signature}`,
     description:
       "Every ALGOBIC build, documented end to end: prompts, failures, cost in ₹, and a live URL.",
     url: `${SITE.url}/builds`,
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
      verbatim, so a shared build link previewed as the landing page. */
   twitter: {
     card: "summary_large_image",
-    title: `Every build, start to finish | ${SITE.name}`,
+    title: `Every build, start to finish | ${SITE.signature}`,
     description:
       "Every ALGOBIC build, documented end to end: prompts, failures, cost in ₹, and a live URL.",
   },

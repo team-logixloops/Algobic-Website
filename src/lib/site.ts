@@ -14,6 +14,15 @@ export const SITE = {
     ""
   ),
   name: "ALGOBIC",
+  /**
+   * The name as a person reads it: with the backslash, which is the brand.
+   * Tab titles, share titles and any plain-text place the name is shown. In
+   * JSX, render `<BrandName />` instead so the slash takes the accent.
+   * Structured data keeps `name`: engines match an entity on its exact name.
+   */
+  signature: "ALGOBIC\\",
+  /** The homepage tab title: the wordmark, then the line, as the lockup reads. */
+  tabTitle: "ALGOBIC\\ Build Before They Do",
   legalName: "Algobic",
   parent: "LogixLoops",
   tagline: "Build Before They Do",

@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { JsonLd } from "@/components/ui/json-ld";
 import { breadcrumbNode, webPageNode } from "@/lib/json-ld";
 import { pageMetadata } from "@/lib/page-meta";
+import { BrandName } from "@/components/ui/brand-name";
 import { SITE } from "@/lib/site";
 
 /**
@@ -267,11 +268,7 @@ export default function TermsPage() {
               plan you buy are the ones stated on the pricing page.
             </p>
             <p>
-              {SITE.legalName}
-              <span aria-hidden="true" className="slash-glyph">
-                \
-              </span>
-              , a {SITE.parent} company, India. Governed by the
+              <BrandName legal />, a {SITE.parent} company, India. Governed by the
               laws of India.
             </p>
           </div>

@@ -285,7 +285,7 @@ export default function WorkPage() {
               href: "/about",
               label: "About",
               detail:
-                "What ALGOBIC is, why now, and the five things it refuses to be.",
+                `What ${SITE.signature} is, why now, and the five things it refuses to be.`,
             },
           ]}
         />

@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const build = getBuild(slug);
   if (!build) return {};
 
-  const full = `${build.title} | ${SITE.name}`;
+  const full = `${build.title} | ${SITE.signature}`;
   const url = `${SITE.url}/builds/${build.slug}`;
 
   return {

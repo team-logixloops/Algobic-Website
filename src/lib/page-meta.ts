@@ -47,7 +47,7 @@ export function pageMetadata({
   index?: boolean;
 }): Metadata {
   const url = `${SITE.url}${path}`;
-  const full = `${title} | ${SITE.name}`;
+  const full = `${title} | ${SITE.signature}`;
 
   return {
     title,

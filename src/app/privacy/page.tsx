@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { JsonLd } from "@/components/ui/json-ld";
 import { breadcrumbNode, webPageNode } from "@/lib/json-ld";
 import { pageMetadata } from "@/lib/page-meta";
+import { BrandName } from "@/components/ui/brand-name";
 import { SITE } from "@/lib/site";
 
 /**
@@ -278,11 +279,7 @@ export default function PrivacyPage() {
               reviewed before any real data is taken from anyone.
             </p>
             <p>
-              {SITE.legalName}
-              <span aria-hidden="true" className="slash-glyph">
-                \
-              </span>
-              , a {SITE.parent} company, India. Reachable through
+              <BrandName legal />, a {SITE.parent} company, India. Reachable through
               the{" "}
               <Link
                 href="/pricing#claim"

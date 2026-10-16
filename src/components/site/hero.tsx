@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { BuildIndex } from "@/components/site/build-index";
 import { GlitchField } from "@/components/ui/glitch-field";
+import { BrandName } from "@/components/ui/brand-name";
 
 /**
  * `brand.md`: "The work: shipped things are the hero. Never the founder,
@@ -67,7 +68,7 @@ export function Hero() {
             className="rise mt-[clamp(1.25rem,3vw,2rem)] max-w-[46ch] text-[clamp(0.95rem,1.4vw,1.0625rem)] leading-relaxed text-foreground"
             style={{ "--d": "420ms" } as React.CSSProperties}
           >
-            ALGOBIC is where people build the AI projects they see online. No
+            <BrandName /> is where people build the AI projects they see online. No
             coding background required, and no course to buy. Every build is
             documented end to end: the exact prompts, where it broke, what it
             cost, and a live URL you can open.

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BrandMask } from "@/components/ui/brand-mask";
 import { Seam } from "@/components/ui/seam";
 import { FOOTER_NAV } from "@/lib/nav";
-import { SITE } from "@/lib/site";
+import { BrandName } from "@/components/ui/brand-name";
 
 /**
  * The site's floor.
@@ -144,10 +144,7 @@ function Colophon() {
   return (
     <div className="mt-auto flex flex-col gap-2 border-t border-line pt-[clamp(1rem,2.5vw,1.5rem)] pb-[clamp(1.25rem,3vw,2rem)] font-mono text-micro text-muted sm:flex-row sm:items-center sm:justify-between">
       <p>
-        {SITE.legalName}
-        <span aria-hidden="true" className="slash-glyph">
-          \
-        </span>
+        <BrandName legal />
       </p>
     </div>
   );

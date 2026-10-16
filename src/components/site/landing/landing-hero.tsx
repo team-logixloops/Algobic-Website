@@ -2,6 +2,7 @@ import * as React from "react";
 import { Parallax } from "@/components/ui/scroll-fx";
 import { SplitHeadline } from "@/components/ui/split-headline";
 import { SITE } from "@/lib/site";
+import { BrandName } from "@/components/ui/brand-name";
 
 /**
  * Dispersion.
@@ -100,7 +101,7 @@ export function LandingHero() {
             className="rise ml-auto max-w-[42ch] text-[clamp(0.95rem,1.35vw,1.125rem)] leading-relaxed text-foreground lg:text-right"
             style={{ "--d": "760ms" } as React.CSSProperties}
           >
-            ALGOBIC is where people build the AI projects they see online. No
+            <BrandName /> is where people build the AI projects they see online. No
             coding background required, and no course to buy. Every build is
             documented end to end: the exact prompts, where it broke, what it
             cost, and a live URL you can open.
