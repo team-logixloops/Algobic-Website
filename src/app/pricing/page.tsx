@@ -10,7 +10,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { Clauses, type ClauseItem } from "@/components/site/clause";
 import { Ledger, type LedgerColumn } from "@/components/site/ledger";
 import { EntryBand, PlanDescent } from "@/components/site/pricing/plan-descent";
-import { PlanSwitch } from "@/components/site/pricing/plan-switch";
+import { PlanSwitch, type PlanFolder } from "@/components/site/pricing/plan-switch";
 import { InstagramTrapdoor } from "@/components/ui/instagram-trapdoor";
 import { JsonLd } from "@/components/ui/json-ld";
 import {
@@ -22,15 +22,16 @@ import {
 import { pageMetadata } from "@/lib/page-meta";
 import {
   AUDIENCES,
+  type AudienceId,
   ENTRY_OFFERS,
   PLANS,
   billingLabel,
-  fromPrice,
   plansFor,
   rupees,
   splitSaving,
 } from "@/lib/plans";
 import { SITE } from "@/lib/site";
+import { BrandName } from "@/components/ui/brand-name";
 
 const PATH = "/pricing";
 
@@ -185,6 +186,94 @@ const TABLE_ROWS = [
   ]),
 ];
 
+/* ---------------------------------------------------------------------------
+   The three folders.
+
+   Each folder holds one group's plans as files, the cheapest at the back and
+   the deepest nearest the glass, with the price on every file. The
+   recommended plan is the one file printed as a picture rather than a sheet,
+   so it is the one the eye finds in the fan.
+
+   The artwork is generated from the brand's own colours, never fetched:
+   orange ink for college, paper and orange for school, the violet for
+   institutions. Each recipe runs from the darkest value in the palette to the
+   lightest so the liquid shading has the whole range to work in.
+--------------------------------------------------------------------------- */
+
+const FOLDER_LOOK: Record<
+  AudienceId,
+  Pick<PlanFolder, "tone" | "art" | "seed">
+> = {
+  college: {
+    tone: "dark",
+    seed: 7,
+    art: {
+      style: "marble",
+      colors: ["#0b0a0c", "#2a1406", "#9c3d06", "#ff7712", "#ffb37a", "#1a1210", "#f7f5f2"],
+      scale: 0.66,
+      warp: 3.2,
+      angle: -0.5,
+      gloss: 0.5,
+      veins: 0.45,
+    },
+  },
+  school: {
+    tone: "light",
+    seed: 4,
+    art: {
+      style: "streak",
+      colors: ["#f7f5f2", "#efebe4", "#ffd2ad", "#ff9a4d", "#ff7712", "#e7dcff", "#f2eef7"],
+      scale: 0.7,
+      warp: 1.5,
+      angle: -0.62,
+      gloss: 0.2,
+      veins: 0,
+    },
+  },
+  institutions: {
+    tone: "dark",
+    seed: 12,
+    art: {
+      style: "marble",
+      colors: ["#08070c", "#1c1430", "#4d2a8a", "#8847e4", "#a97cf0", "#211c2a", "#f2eef7"],
+      scale: 0.72,
+      warp: 3.4,
+      angle: 0.8,
+      gloss: 0.5,
+      veins: 0.5,
+    },
+  },
+};
+
+function shortPrice(price: number, monthly: boolean): string {
+  return `${rupees(price)}${monthly ? "/mo" : ""}`;
+}
+
+const FOLDERS: readonly PlanFolder[] = AUDIENCES.map((audience) => {
+  const plans = plansFor(audience.id);
+  const cheapest = plans.reduce((low, plan) => (plan.price < low.price ? plan : low));
+  return {
+    id: audience.id,
+    label: audience.label,
+    meta: `${plans.length} plans, from ${shortPrice(
+      cheapest.price,
+      cheapest.billing.kind === "monthly"
+    )}`,
+    ...FOLDER_LOOK[audience.id],
+    files: plans.map((plan) => ({
+      name: plan.name,
+      meta: shortPrice(plan.price, plan.billing.kind === "monthly"),
+      href: `#${plan.id}`,
+      /* School's own art is pale, and a file's name is set in white over its
+         picture, so the school pick borrows college's darker ink to stay
+         readable. */
+      ...(plan.recommended
+        ? { art: FOLDER_LOOK[audience.id === "school" ? "college" : audience.id].art }
+        : {}),
+    })),
+  };
+});
+
 export default function PricingPage() {
   const structuredData = [
     webPageNode({
@@ -243,7 +332,7 @@ export default function PricingPage() {
           label="Pay to enter. Ship to go deeper."
           answer={
             <>
-              Every {SITE.name} plan, priced in rupees on one page. College
+              Every <BrandName /> plan, priced in rupees on one page. College
               cohorts run four to eight weeks from {rupees(COLLEGE_FROM.price)}.
               School batches start at {rupees(SCHOOL_FROM.price)} a month.
               Institutions can certify coaches and train teachers and faculty.
@@ -258,13 +347,7 @@ export default function PricingPage() {
           Instagram. Nothing is charged on this site.
         </p>
 
-        <PlanSwitch
-          tabs={AUDIENCES.map((audience) => ({
-            id: audience.id,
-            label: audience.label,
-            detail: fromPrice(audience.id),
-          }))}
-        >
+        <PlanSwitch folders={FOLDERS}>
           {AUDIENCES.map((audience) => (
             <PlanDescent
               key={audience.id}
@@ -303,7 +386,7 @@ export default function PricingPage() {
         >
           <div className="max-w-[76rem]">
             <Ledger
-              caption={`${SITE.name} pricing, in rupees`}
+              caption={`${SITE.signature} pricing, in rupees`}
               columns={TABLE_COLUMNS}
               rows={TABLE_ROWS}
               minWidth="min-w-[48rem]"

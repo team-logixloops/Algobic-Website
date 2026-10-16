@@ -1,151 +1,173 @@
 "use client";
 
 import * as React from "react";
+import GlassFolder, {
+  type ArtRecipe,
+  type FolderFile,
+} from "@/components/ui/glass-folder-cards";
 
-export type SwitchTab = {
-  /** Panel id and URL fragment: `/pricing#school` opens the school panel. */
+export type PlanFolder = {
+  /** Panel id and URL fragment: `/pricing#school` shows the school plans. */
   id: string;
   label: string;
-  /** The cheapest way in, so the switch itself carries a price. */
-  detail: string;
+  /** The folder's second line: how many plans, and the cheapest way in. */
+  meta: string;
+  tone: "light" | "dark";
+  art: ArtRecipe;
+  seed: number;
+  /** One file per plan. `href` is the plan's fragment. */
+  files: FolderFile[];
 };
 
+/** Fixed rather than fluid: the folder draws at a set size and scales inside. */
+const FOLDER_WIDTH = 300;
+
 /**
- * Three buyers, one page, one panel showing at a time.
+ * Three buyers, one page: each group of plans is a folder.
  *
- * Every panel is rendered on the server and stays in the document. The inactive
- * ones carry `hidden`, which removes them from view and from the accessibility
- * tree but not from the HTML, so a crawler or an answer engine reading the page
- * source gets every plan whichever tab a person happens to be on. That is the
- * whole reason this is tabs over separate routes: the user wanted every plan on
- * one page, and one page is also the strongest single document to cite.
+ * The folder is the overview and the panel under it is the detail. Opening a
+ * folder fans its plans out with their prices on them and switches the panel
+ * below to that group. Choosing a plan from the fan jumps to its full terms.
+ * The text control under each folder does the same switch without the fan,
+ * and carries the state: `aria-pressed` and the drawn rule mark the group the
+ * panel is showing, because a folder closes when you click away from it and
+ * the selection must not close with it.
  *
- * College is first and open by default. A fragment can open any other panel,
- * and a fragment naming a plan (`#school-deep-end`) opens the panel that holds
- * it and scrolls to the plan, so a link to one tier from anywhere works.
+ * Every panel is rendered on the server and stays in the document. The
+ * inactive ones carry `hidden`, which removes them from view but not from the
+ * HTML, so a crawler or an answer engine gets every plan whichever folder a
+ * person opened. A fragment can open any panel, and a fragment naming a plan
+ * (`#school-deep-end`) opens the panel that holds it and scrolls to the plan.
  *
- * Keyboard follows the WAI-ARIA tabs pattern with automatic activation: arrows
- * move and select, Home and End jump, and only the selected tab is in the tab
- * order.
+ * Phones get the folders as a row that scrolls sideways, one folder and the
+ * edge of the next on screen, rather than three stacked folders pushing every
+ * price below the fold.
  */
 export function PlanSwitch({
-  tabs,
+  folders,
   children,
 }: {
-  tabs: readonly SwitchTab[];
-  /** One panel per tab, in the same order. */
+  folders: readonly PlanFolder[];
+  /** One panel per folder, in the same order. */
   children: readonly React.ReactNode[];
 }) {
   const [active, setActive] = React.useState(0);
-  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+  const [open, setOpen] = React.useState<number | null>(null);
+
+  const select = React.useCallback(
+    (index: number) => {
+      setActive(index);
+      /* `replaceState`, not `location.hash`: assigning the hash would jump
+         the page and add a history entry per click. */
+      window.history.replaceState(null, "", `#${folders[index].id}`);
+    },
+    [folders]
+  );
+
+  /** Show the panel that holds `targetId`, then scroll to it once it has a box. */
+  const reveal = React.useCallback(
+    (targetId: string) => {
+      const direct = folders.findIndex((folder) => folder.id === targetId);
+      const target = document.getElementById(targetId);
+      const panel = target?.closest<HTMLElement>("[data-plan-panel]");
+      const index = direct >= 0 ? direct : panel ? Number(panel.dataset.planPanel) : -1;
+      if (index < 0 || !target) return;
+
+      setActive(index);
+      /* A hidden panel has no box to scroll to in this frame. One frame later
+         it does. */
+      requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+    },
+    [folders]
+  );
 
   React.useEffect(() => {
-    function openFromHash() {
+    function fromHash() {
       const hash = decodeURIComponent(window.location.hash.slice(1));
-      if (!hash) return;
-
-      const direct = tabs.findIndex((tab) => tab.id === hash);
-      if (direct >= 0) {
-        setActive(direct);
-        return;
-      }
-
-      const target = document.getElementById(hash);
-      const panel = target?.closest<HTMLElement>("[data-plan-panel]");
-      if (!target || !panel) return;
-
-      setActive(Number(panel.dataset.planPanel));
-      /* The panel is still `hidden` in this frame, and a hidden target has no
-         box to scroll to. One frame later it does. */
-      requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+      if (hash) reveal(hash);
     }
 
-    openFromHash();
-    window.addEventListener("hashchange", openFromHash);
-    return () => window.removeEventListener("hashchange", openFromHash);
-  }, [tabs]);
-
-  function select(index: number, focus = false) {
-    setActive(index);
-    /* `replaceState`, not `location.hash`: assigning the hash would jump the
-       page to the panel and add a history entry per click. */
-    window.history.replaceState(null, "", `#${tabs[index].id}`);
-    if (focus) tabRefs.current[index]?.focus();
-  }
-
-  function onKeyDown(event: React.KeyboardEvent, index: number) {
-    const last = tabs.length - 1;
-    const next =
-      event.key === "ArrowRight"
-        ? index === last
-          ? 0
-          : index + 1
-        : event.key === "ArrowLeft"
-          ? index === 0
-            ? last
-            : index - 1
-          : event.key === "Home"
-            ? 0
-            : event.key === "End"
-              ? last
-              : null;
-
-    if (next === null) return;
-    event.preventDefault();
-    select(next, true);
-  }
+    fromHash();
+    window.addEventListener("hashchange", fromHash);
+    return () => window.removeEventListener("hashchange", fromHash);
+  }, [reveal]);
 
   return (
     <div>
       <div className="mx-auto w-full max-w-[110rem] px-[max(1rem,4vw)]">
-        <div
-          role="tablist"
-          aria-label="Show plans for"
-          className="grid grid-cols-3 border-y border-line"
+        <ul
+          aria-label="Plans, by who they are for"
+          /* The top padding is the room an open folder's files rise into. A
+             row that scrolls sideways clips vertically as well, so without it
+             the fan would be cut off at the top on phones. */
+          className="-mx-[max(1rem,4vw)] flex snap-x snap-mandatory gap-x-[clamp(1.25rem,4vw,3.5rem)] overflow-x-auto px-[max(1rem,4vw)] pt-[clamp(3.5rem,7vw,4.5rem)] pb-4 lg:mx-0 lg:justify-center lg:overflow-visible lg:px-0"
         >
-          {tabs.map((tab, i) => {
+          {folders.map((folder, i) => {
             const selected = i === active;
             return (
-              <button
-                key={tab.id}
-                ref={(node) => {
-                  tabRefs.current[i] = node;
-                }}
-                type="button"
-                role="tab"
-                id={`tab-${tab.id}`}
-                aria-selected={selected}
-                aria-controls={tab.id}
-                tabIndex={selected ? 0 : -1}
-                onClick={() => select(i)}
-                onKeyDown={(event) => onKeyDown(event, i)}
-                className={`wipe group relative flex min-h-11 flex-col items-start gap-1 px-[clamp(0.5rem,2vw,1.5rem)] py-[clamp(0.875rem,2.2vw,1.375rem)] text-left not-first:border-l not-first:border-line ${
-                  selected ? "text-foreground" : "text-muted hover:text-foreground"
-                }`}
+              <li
+                key={folder.id}
+                className="flex shrink-0 snap-center flex-col items-start gap-[clamp(0.75rem,2vw,1.125rem)]"
               >
-                <span className="font-display text-[clamp(0.9375rem,2vw,1.375rem)] leading-tight font-bold">
-                  {tab.label}
-                </span>
-                <span className="font-mono text-micro text-pretty">{tab.detail}</span>
-
-                {/* The nav's own hover rule, held drawn while selected. */}
-                <span
-                  aria-hidden="true"
-                  className="nav-rule absolute inset-x-[clamp(0.5rem,2vw,1.5rem)] bottom-0 h-[3px] bg-accent-ink"
+                <GlassFolder
+                  label={folder.label}
+                  meta={folder.meta}
+                  tone={folder.tone}
+                  art={folder.art}
+                  seed={folder.seed}
+                  files={folder.files}
+                  action="none"
+                  width={FOLDER_WIDTH}
+                  appearDelay={i * 140}
+                  open={open === i}
+                  onOpenChange={(next) => {
+                    setOpen((current) => (next ? i : current === i ? null : current));
+                    if (next) select(i);
+                  }}
+                  onFileSelect={(file) => {
+                    if (file.href?.startsWith("#")) reveal(file.href.slice(1));
+                  }}
                 />
-              </button>
+
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  aria-controls={folder.id}
+                  onClick={() => {
+                    select(i);
+                    requestAnimationFrame(() =>
+                      document.getElementById(folder.id)?.scrollIntoView({ block: "start" })
+                    );
+                  }}
+                  className={`group relative ml-[clamp(0.25rem,1vw,0.75rem)] inline-flex min-h-11 items-center gap-2 font-mono text-data ${
+                    selected ? "text-foreground" : "text-muted hover:text-foreground"
+                  }`}
+                >
+                  {selected ? "Showing" : "Show"} {folder.label.toLowerCase()} plans
+                  <span aria-hidden="true" className="slash-glyph">
+                    \
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="nav-rule absolute inset-x-0 bottom-1.5 h-[2px] bg-accent-ink"
+                  />
+                </button>
+              </li>
             );
           })}
-        </div>
+        </ul>
+
+        <p aria-live="polite" className="sr-only">
+          Showing {folders[active].label.toLowerCase()} plans
+        </p>
       </div>
 
       {children.map((panel, i) => (
         <div
-          key={tabs[i].id}
-          id={tabs[i].id}
-          role="tabpanel"
-          aria-labelledby={`tab-${tabs[i].id}`}
+          key={folders[i].id}
+          id={folders[i].id}
           data-plan-panel={i}
+          className="scroll-mt-[clamp(5.25rem,10vw,7rem)]"
           hidden={i !== active}
         >
           {panel}

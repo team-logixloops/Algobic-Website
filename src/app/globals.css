@@ -262,8 +262,9 @@ body {
   transform: skewX(calc(-1 * var(--slash-angle))) scaleX(1);
 }
 
-/* A selected tab keeps the rule drawn. `/pricing`'s plan switch. */
-[aria-selected="true"] .nav-rule {
+/* A selected or pressed control keeps the rule drawn. `/pricing`'s folders. */
+[aria-selected="true"] .nav-rule,
+[aria-pressed="true"] .nav-rule {
   transform: skewX(calc(-1 * var(--slash-angle))) scaleX(1);
 }
 
